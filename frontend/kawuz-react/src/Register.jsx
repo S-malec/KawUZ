@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from "react";
-import "./css/Login.css";
+import { useState, useEffect } from 'react';
 
-const BASE = "http://localhost:8080/api";
-
-export default function Register({ onSwitchToLogin, onCancel, isModal = false, onClose }) {
+function Register({ onSwitchToLogin }) {
     const [formData, setFormData] = useState({ username: '', password: '', email: '' });
     const [captcha, setCaptcha] = useState({ question: '', answer: 0 });
     const [userCaptcha, setUserCaptcha] = useState('');
@@ -15,15 +12,14 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
         setCaptcha({ question: `${a} + ${b}`, answer: a + b });
     }, []);
 
-    const handleRegister = async (e) => {
-        e.preventDefault();
+    const handleRegister = async () => {
         if (parseInt(userCaptcha) !== captcha.answer) {
-            setMsg("❌ Błąd: Zły wynik!");
+            setMsg("❌ Błąd: Zły wynik działania!");
             return;
         }
 
         try {
-            const res = await fetch(`${BASE}/auth/register`, {
+            const res = await fetch('http://localhost:8080/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -31,75 +27,35 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
             const data = await res.json();
 
             if (res.ok) {
-                setMsg("✅ Zarejestrowano!");
-                setTimeout(() => onSwitchToLogin(), 1500);
+                setMsg("✅ " + data.message);
+                setFormData({ username: '', password: '', email: '' });
+                setUserCaptcha('');
             } else {
-                setMsg("⚠️ " + (data.message || "Błąd rejestracji."));
+                setMsg("⚠️ " + data.message);
             }
         } catch (err) {
-            setMsg("Błąd połączenia.");
+            setMsg("Błąd połączenia z serwerem.");
         }
     };
 
-    const handleOverlayClick = (e) => {
-        if (isModal && e.target.classList.contains('modal-overlay')) {
-            onClose();
-        }
-    };
-
-    const formContent = (
-        <form onSubmit={handleRegister} className="auth-card">
+    return (
+        <div style={{ padding: 20, border: '1px solid #ccc', margin: '20px auto', maxWidth: 300, background: '#222', color: 'white' }}>
             <h3>Rejestracja</h3>
-            <input
-                placeholder="Login"
-                required
-                onChange={e => setFormData({...formData, username: e.target.value})}
-                value={formData.username}
-            />
-            <input
-                type="email"
-                placeholder="Email"
-                required
-                onChange={e => setFormData({...formData, email: e.target.value})}
-                value={formData.email}
-            />
-            <input
-                type="password"
-                placeholder="Hasło"
-                required
-                onChange={e => setFormData({...formData, password: e.target.value})}
-                value={formData.password}
-            />
+            <input placeholder="Login" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} style={s.input}/><br/>
+            <input placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={s.input}/><br/>
+            <input type="password" placeholder="Hasło" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} style={s.input}/><br/>
 
-            <div className="captcha-container">
-                <label>Ile to jest: <b>{captcha.question}</b> ?</label>
-                <input
-                    type="number"
-                    style={{ width: '60px', marginLeft: '10px', marginBottom: 0 }}
-                    value={userCaptcha}
-                    onChange={e => setUserCaptcha(e.target.value)}
-                    required
-                />
+            {/* CAPTCHA */}
+            <div style={{ margin: '10px 0', padding: 5, background: '#444' }}>
+                <label>Ile to jest: <b>{captcha.question}</b> ? </label>
+                <input type="number" style={{ width: 50, marginLeft: 10 }} value={userCaptcha} onChange={e => setUserCaptcha(e.target.value)} />
             </div>
 
-            <button type="submit">Zarejestruj się</button>
-            <button type="button" onClick={isModal ? onClose : onCancel}>Anuluj</button>
-
+            <button onClick={handleRegister}>Zarejestruj się</button>
             <p>{msg}</p>
-
-            <button type="button" onClick={onSwitchToLogin} className="switch-login">
-                Mam już konto
-            </button>
-        </form>
+            <button onClick={onSwitchToLogin} style={s.link}>Mam już konto</button>
+        </div>
     );
-
-    if (isModal) {
-        return (
-            <div className="modal-overlay" onClick={handleOverlayClick}>
-                {formContent}
-            </div>
-        );
-    }
-
-    return formContent;
 }
+const s = { input: { marginBottom: 10, padding: 5, width: '90%' }, link: { background: 'none', border: 'none', color: '#88f', cursor: 'pointer', marginTop: 10 } };
+export default Register;

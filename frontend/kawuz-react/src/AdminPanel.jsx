@@ -56,9 +56,7 @@ function AdminPanel({ forceRefresh, onEdit}) {
     return (
         <div>
             <hr />
-            <center>
             <ProductForm onProductSaved={handleProductSaved} initialProduct={{}} />
-            </center>
             <hr />
             <h2>Zarządzanie Produktami</h2>
             <table border="1" cellPadding="10" style={{ width: '100%' }}>
