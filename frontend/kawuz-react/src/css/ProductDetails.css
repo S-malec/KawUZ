@@ -1,0 +1,149 @@
+.product-details-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--border);
+}
+
+.btn-back {
+    background: transparent;
+    color: var(--text-soft);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.product-card-main {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+.product-image-section {
+    flex: 0 0 400px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid var(--border);
+}
+
+.product-image-section img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.product-info-section {
+    flex: 1;
+}
+
+.details-name {
+    font-size: 2.5rem;
+    color: var(--text-bold);
+    margin: 0;
+    border: none;
+}
+
+.details-weight-badge {
+    display: inline-block;
+    background: var(--weight-bg);
+    color: var(--text-bold);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.details-description {
+    font-size: 1.1rem;
+    color: var(--text-soft);
+    line-height: 1.6;
+    margin: 20px 0;
+}
+
+/* Statystyki */
+.details-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    background: var(--bg);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.details-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 2px solid var(--border);
+    padding-top: 20px;
+}
+
+.details-price {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-bold);
+}
+
+.details-actions {
+    display: flex;
+    gap: 15px;
+    width: 60%;
+}
+
+/* Przycisk PDF */
+.btn-pdf {
+    background: #e53e3e !important;
+    color: white !important;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 4px 0 #9b2c2c;
+    cursor: pointer;
+}
+
+.btn-pdf:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+/* Mapa */
+.details-map-section {
+    margin-top: 40px;
+}
+
+.details-map {
+    border-radius: 15px;
+    border: 1px solid var(--border);
+}
+
+/* Admin Controls */
+.admin-controls {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 2px dashed var(--border);
+}
+
+.update-product-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 850px) {
+    .product-card-main { flex-direction: column; }
+    .product-image-section { flex: 1 1 auto; width: 100%; box-sizing: border-box; }
+    .details-actions { width: 100%; }
+}
