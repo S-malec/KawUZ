@@ -5,163 +5,153 @@ import "./css/ProductDetails.css";
 
 const BASE = "http://localhost:8080/api";
 
-// --- Komponent Formularza Edycji ---
+// --- Komponent Kropek (ten sam co na liście) ---
+const CoffeeAttribute = ({ value, label }) => {
+    return (
+        <div className="stat-row">
+            <span className="stat-label">{label}:</span>
+            <div className="dots">
+                {[1, 2, 3].map(dot => (
+                    <span key={dot} className={`dot ${dot <= value ? "filled" : ""}`}></span>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// --- Komponent Formularza Edycji (zaktualizowany o nowe pola) ---
 function UpdateProductForm({ product, onUpdate }) {
-    const [name, setName] = useState(product?.name ?? "");
-    const [price, setPrice] = useState(product?.price ?? "");
-    const [desc, setDesc] = useState(product?.description ?? "");
+    const [formData, setFormData] = useState({
+        name: product?.name ?? "",
+        price: product?.price ?? "",
+        description: product?.description ?? "",
+        roastLevel: product?.roastLevel ?? 1,
+        acidity: product?.acidity ?? 1,
+        caffeineLevel: product?.caffeineLevel ?? 1,
+        sweetness: product?.sweetness ?? 1,
+        weight: product?.weight ?? "500g"
+    });
     const [msg, setMsg] = useState("");
 
-    useEffect(() => {
-        setName(product?.name ?? "");
-        setPrice(product?.price ?? "");
-        setDesc(product?.description ?? "");
-        setMsg("");
-    }, [product]);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     const submitAsJson = async (e) => {
         e.preventDefault();
-        if (!product) return setMsg("No product loaded");
-        const payload = { id: product.id, name, price, description: desc };
-
         try {
             const res = await fetch(`${BASE}/product/${product.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: 'include',
-                body: JSON.stringify(payload),
+                body: JSON.stringify({ ...formData, id: product.id }),
             });
-            const text = await res.text();
             if (res.ok) {
-                setMsg("Zaktualizowano!");
-                onUpdate?.(text);
+                setMsg("Zaktualizowano pomyślnie!");
+                onUpdate?.();
             } else {
-                setMsg("Błąd aktualizacji: " + text);
+                setMsg("Błąd aktualizacji.");
             }
-        } catch (err) {
-            setMsg(err.message);
-        }
+        } catch (err) { setMsg(err.message); }
     };
 
     return (
-        <div>
-            <h4>Edytuj produkt</h4>
-            <form onSubmit={submitAsJson} className="update-product-form">
-                <label>Nazwa: <input value={name} onChange={e => setName(e.target.value)} /></label>
-                <label>Cena: <input value={price} onChange={e => setPrice(e.target.value)} /></label>
-                <label>Opis:<br />
-                    <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={3} cols={30} />
+        <form onSubmit={submitAsJson} className="update-product-form">
+            <h4>Edytuj parametry</h4>
+            <div className="form-grid">
+                <label>Nazwa: <input name="name" value={formData.name} onChange={handleChange} /></label>
+                <label>Cena: <input name="price" value={formData.price} onChange={handleChange} /></label>
+                <label>Waga:
+                    <select name="weight" value={formData.weight} onChange={handleChange}>
+                        <option value="500g">500g</option>
+                        <option value="1000g">1000g</option>
+                    </select>
                 </label>
-                <button type="submit">Zapisz zmiany</button>
-            </form>
+            </div>
+            <label>Opis: <textarea name="description" value={formData.description} onChange={handleChange} /></label>
             <div className="status-message">{msg}</div>
-        </div>
+            <button type="submit" className="btn-save">Zapisz zmiany</button>
+        </form>
     );
 }
 
-// --- Główny Komponent Szczegółów ---
+// --- Główny Komponent ---
 function ProductDetails({ id, onBack, refreshList, isEditable = false, onAddToCart }) {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
-    useEffect(() => {
+    const fetchProduct = () => {
         if (!id) return;
         setLoading(true);
-        fetch(`${BASE}/product/${id}`, {credentials: 'include'})
-            .then(res => {
-                if (res.status === 404) throw new Error("Product not found");
-                if (!res.ok) throw new Error("Error fetching product");
-                return res.json();
-            })
+        fetch(`${BASE}/product/${id}`, { credentials: 'include' })
+            .then(res => res.json())
             .then(p => setProduct(p))
             .catch(e => setMessage(e.message))
             .finally(() => setLoading(false));
-    }, [id]);
-
-    const deleteProduct = () => {
-        if (!window.confirm("Delete this product?")) return;
-        fetch(`${BASE}/product/${id}`, {
-            method: "DELETE",
-            credentials: 'include'
-        })
-            .then(res => res.text().then(text => ({ok: res.ok, status: res.status, text})))
-            .then(r => {
-                if (r.ok) {
-                    setMessage("Deleted");
-                    refreshList?.();
-                    setTimeout(onBack, 1000);
-                } else {
-                    setMessage(`Failed: ${r.text || r.status}`);
-                }
-            })
-            .catch(e => setMessage(e.message));
     };
 
-    const downloadPdf = () => {
-            window.location.href = `${BASE}/product/${product.id}/pdf`;
-    };
+    useEffect(fetchProduct, [id]);
 
-    if (loading) return <div className="status-message">Ładowanie szczegółów...</div>;
-    if (message && !product) return <div className="error-message">Błąd: {message}</div>;
+    if (loading) return <div className="status-message">Ładowanie...</div>;
     if (!product) return null;
 
     return (
         <div className="product-details-container">
-            <h3 className="product-details-title">Szczegóły produktu</h3>
-            <div className="product-card-flex product-card">
-                <div className="product-image-wrapper">
+            <button onClick={onBack} className="btn-back">← Powrót do listy</button>
+
+            <div className="product-card-main">
+                <div className="product-image-section">
                     <img src={getProductImage(product.name)} alt={product.name} />
                 </div>
 
-                <div className="product-info-wrapper">
-                    <h4 className="product-info-name">{product.name}</h4>
-                    <p className="product-info-desc">{product.description}</p>
-                    <b className="product-info-price">{product.price} zł</b>
+                <div className="product-info-section">
+                    <h2 className="details-name">{product.name}</h2>
+                    <span className="details-weight-badge">{product.weight}</span>
+                    <p className="details-description">{product.description}</p>
 
-                    {!isEditable && (
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                            <button onClick={() => onAddToCart(product)} className="btn-primary">
+                    <div className="details-stats-grid">
+                        <CoffeeAttribute label="Palenie" value={product.roastLevel} />
+                        <CoffeeAttribute label="Kwasowość" value={product.acidity} />
+                        <CoffeeAttribute label="Kofeina" value={product.caffeineLevel} />
+                        <CoffeeAttribute label="Słodycz" value={product.sweetness} />
+                    </div>
+
+                    <div className="details-price-row">
+                        <span className="details-price">{product.price} zł</span>
+                        <div className="details-actions">
+                            <button onClick={() => onAddToCart(product)} className="btnCart">
                                 Dodaj do koszyka
                             </button>
-
-                            <button onClick={downloadPdf} className="btn-primary" style={{ backgroundColor: '#dc3545', borderColor: '#dc3545' }}>
-                                Pobierz PDF
+                            <button onClick={() => window.location.href=`${BASE}/product/${product.id}/pdf`} className="btn-pdf">
+                                PDF
                             </button>
                         </div>
-                    )}
-
-                    {product.map && (
-                        <div className="map-section">
-                            <h4 className="product-details-title">Miejsce pochodzenia</h4>
-                            <iframe
-                                src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyB2NIWI3Tv9iDPrlnowr_0ZqZWoAQydKJU&q=$$${product.map}&maptype=roadmap`}
-                                width="50%"
-                                height="150px"
-                                className="map-iframe"
-                                allowFullScreen={true}
-                                loading="lazy"
-                                referrerPolicy="no-referrer-when-downgrade"
-                            ></iframe>
-                        </div>
-                    )}
+                    </div>
                 </div>
             </div>
 
-            {isEditable && (
-                <>
-                    <hr className="separator"/>
-                    <UpdateProductForm
-                        product={product}
-                        onUpdate={(msg) => { setMessage(msg); refreshList?.(); }}
-                    />
-                    <hr className="separator"/>
-                    <button onClick={deleteProduct} className="btn-danger">
-                        Usuń produkt
-                    </button>
-                </>
+            {product.map && (
+                <div className="details-map-section">
+                    <h3>Miejsce pochodzenia</h3>
+                    <iframe
+                        src={`https://maps.google.com/maps?q=${product.map}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                        width="100%"
+                        height="300px"
+                        className="details-map"
+                        allowFullScreen
+                        loading="lazy"
+                    ></iframe>
+                </div>
             )}
-            <div className="status-message">{message}</div>
+
+            {isEditable && (
+                <div className="admin-controls">
+                    <UpdateProductForm product={product} onUpdate={fetchProduct} />
+                    <button onClick={() => {/* funkcja delete */}} className="btn-danger-outline">Usuń produkt całkowicie</button>
+                </div>
+            )}
         </div>
     );
 }
@@ -174,7 +164,7 @@ export default function ProductDetailsWrapper({ user, onAddToCart, refreshList }
     return (
         <ProductDetails
             id={realId}
-            onBack={() => navigate(-1)}
+            onBack={() => navigate("/")}
             onAddToCart={onAddToCart}
             refreshList={refreshList}
             isEditable={user?.isAdmin}
