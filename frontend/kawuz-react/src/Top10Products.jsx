@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
 const BASE = "http://localhost:8080/api";
 
-export default function Top10Products({ onSelect, onAddToCart }) {
+export default function Top10Products({ onAddToCart }) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
-        fetch(`${BASE}/products/top10`, { credentials: "include" })
+        fetch(`${BASE}/product/top10`, { credentials: "include" })
             .then(res => {
                 if (!res.ok) throw new Error("Nie udało się pobrać Top 10");
                 return res.json();
