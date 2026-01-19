@@ -11,14 +11,22 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import com.lowagie.text.pdf.BaseFont;
 
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.*;
+import org.springframework.http.MediaType;
+
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api")
 
+
+
 public class ProductController {
     ProductService productService;
+
+    private final String UPLOAD_DIR = "frontend/kawuz-react/public/images/";
 
     public ProductController(ProductService productService) {
         this.productService = productService;
@@ -84,6 +92,38 @@ public class ProductController {
         return new ResponseEntity<>(topProducts, HttpStatus.OK);
     }
 
+    @PostMapping(value = "/product", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<Product> createProduct(
+            @RequestPart("product") Product product,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        Product savedProduct = productService.addProduct(product);
+
+        if (image != null && !image.isEmpty()) {
+            saveImage(image, savedProduct.getName());
+        }
+
+        return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
+    }
+
+    @PutMapping(value = "/product/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<String> updateProduct(
+            @PathVariable int id,
+            @RequestPart("product") Product product,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        Product updatedProduct = productService.updateProduct(product, id);
+
+        if (updatedProduct != null) {
+            if (image != null && !image.isEmpty()) {
+                saveImage(image, updatedProduct.getName());
+            }
+            return new ResponseEntity<>("Updated", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Failed to update", HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/product/{id}/pdf")
     public void generatePdf(@PathVariable int id, HttpServletResponse response) throws IOException {
         Product product = productService.getProductById(id);
@@ -123,6 +163,26 @@ public class ProductController {
         document.add(new Paragraph("Wygenerowano z KawUZ", FontFactory.getFont(FontFactory.COURIER, BaseFont.CP1250, BaseFont.EMBEDDED, 10)));
 
         document.close();
+    }
+
+    private void saveImage(MultipartFile file, String productName) {
+        try {
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Zapisujemy jako nazwa_produktu.png
+            String fileName = productName + ".png";
+            Path filePath = uploadPath.resolve(fileName);
+
+            // Nadpisujemy jeśli już istnieje
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            System.out.println("Zapisano zdjęcie: " + filePath.toAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("Błąd zapisu pliku: " + e.getMessage());
+        }
     }
 }
 
