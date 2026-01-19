@@ -41,19 +41,30 @@ function UpdateProductForm({ product, onUpdate }) {
     const submitAsJson = async (e) => {
         e.preventDefault();
         try {
+            // Tworzymy pełny obiekt: bierzemy wszystko z oryginalnego produktu
+            // i nadpisujemy tym, co użytkownik zmienił w formularzu
+            const updatedProduct = {
+                ...product,      // <--- To zachowa adresy map, sales, imageUrl itp.
+                ...formData,     // <--- To nadpisze nazwę, cenę itp. nowymi danymi
+                id: product.id   // Upewniamy się, że ID jest poprawne
+            };
+
             const res = await fetch(`${BASE}/product/${product.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: 'include',
-                body: JSON.stringify({ ...formData, id: product.id }),
+                body: JSON.stringify(updatedProduct),
             });
+
             if (res.ok) {
                 setMsg("Zaktualizowano pomyślnie!");
                 onUpdate?.();
             } else {
                 setMsg("Błąd aktualizacji.");
             }
-        } catch (err) { setMsg(err.message); }
+        } catch (err) {
+            setMsg(err.message);
+        }
     };
 
     return (

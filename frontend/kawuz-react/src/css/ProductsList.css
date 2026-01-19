@@ -2,7 +2,6 @@
     width: 98%;
     max-width: 1600px;
     margin: 0 auto;
-    padding: 20px 0;
 }
 
 .main-layout {
@@ -12,10 +11,28 @@
     align-items: start;
 }
 
-.search-wrapper { margin-bottom: 20px; }
+/* Zaktualizowany search-wrapper dla idealnego wyśrodkowania */
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+/* Puste kontenery boczne zapewniające balans dla środka */
+.search-side-space {
+    flex: 1;
+    display: flex;
+}
+
+.search-side-space.right {
+    justify-content: flex-end;
+}
 
 .search-input {
-    width: 100%;
+    flex: 0 1 600px; /* Środkowy element o stałym max-width */
     padding: 12px 15px;
     border: 2px solid var(--border);
     border-radius: 10px;
@@ -24,10 +41,27 @@
     box-sizing: border-box;
 }
 
+.sort-select {
+    padding: 10px 15px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background-color: var(--card-bg);
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 600;
+    transition: border-color 0.2s;
+    height: 48px;
+    min-width: 160px;
+}
+
+.sort-select:hover {
+    border-color: var(--primary);
+}
+
 .sidebar {
     position: sticky;
     top: 15px;
-    padding: 15px;
+    padding: 10px;
     background-color: var(--card-bg);
     border: 2px solid var(--border);
     border-radius: 12px;
@@ -188,6 +222,25 @@
     .main-layout { grid-template-columns: 1fr; }
     .sidebar { position: static; display: flex; flex-wrap: wrap; gap: 10px; }
     .filter-section { flex: 1 1 140px; margin-bottom: 0; }
+}
+
+@media (max-width: 768px) {
+    .search-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+    .search-side-space {
+        display: none; /* Ukrywamy spacery na bardzo małych ekranach dla czytelności */
+    }
+    .search-input {
+        width: 100%;
+        max-width: none;
+    }
+    .search-side-space.right {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 650px) {

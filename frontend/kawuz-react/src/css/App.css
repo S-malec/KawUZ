@@ -9,7 +9,6 @@
 .products-container {
     max-width: 70vw;
     margin: 0 auto;
-    padding: 0 15px;
 }
 
 .productElement {
@@ -20,9 +19,9 @@
     display: flex;
     justify-content:  space-between;
     align-items: center;
-    margin-bottom: 15;
-    padding: 10;
-    border-radius: 10;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 10px;
     text-align: left;
     width: 100%;
     cursor: pointer;
