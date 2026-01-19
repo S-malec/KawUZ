@@ -1,0 +1,154 @@
+.admin-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px 0;
+    color: var(--text);
+}
+
+.admin-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Usunięto niebieski kwadracik (border-left) */
+.section-title-clean {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 25px;
+    text-align: center;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+}
+
+.form-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 30px;
+    margin-bottom: 40px;
+    border-radius: 8px;
+}
+
+.product-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.full-width { grid-column: span 2; }
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.input-group input, .input-group select, .input-group textarea {
+    padding: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+/* Suwaki w dwóch kolumnach */
+.ranges-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 40px;
+    padding: 20px 0;
+}
+
+.range-item label {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.range-item input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-start;
+    padding-top: 10px;
+}
+
+.btn-save {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.btn-cancel {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 30px;
+    margin-left: 15px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Tabela */
+.table-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    padding: 15px;
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border);
+    opacity: 0.7;
+}
+
+.admin-table td {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.text-right { text-align: right !important; }
+
+.btn-edit-link {
+    background: none;
+    border: none;
+    color: #3182ce;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 20px;
+}
+
+.btn-delete-link {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    cursor: pointer;
+    font-weight: 600;
+}
