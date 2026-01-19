@@ -213,6 +213,77 @@
     opacity: 0.6;
 }
 
+.btnRemove {
+    background-color: #b33;          
+    color: #fff;
+    width: 100%;
+    padding: 12px 5px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 4px 0 #800;
+    transition: all 0.1s;
+    text-align: center;
+}
+
+.actions-section .btnRemove:hover:not(:disabled) {
+    background-color: #922;
+    top: -2px;
+    box-shadow: 0 6px 0 #800;
+}
+
+.actions-section .btnRemove:active:not(:disabled) {
+    top: 4px;
+    box-shadow: 0 0 0 transparent;
+}
+
+.actions-section .btnRemove:disabled {
+    background: #ccc;
+    box-shadow: none;
+    top: 0;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btnCartCheckout {
+    background: var(--primary) !important;
+    color: #fff !important;
+    width: 200px; 
+    max-width: 90%;
+    padding: 12px 5px;
+    border: none !important;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 4px 0 #1e3a8a !important;
+    transition: all 0.1s;
+    text-align: center;
+}
+
+.btnCartCheckout:hover:not(:disabled) {
+    background: var(--primary-hover) !important;
+    top: -2px;
+    box-shadow: 0 6px 0 #1e3a8a !important;
+}
+
+.btnCartCheckout:active:not(:disabled) {
+    top: 4px !important;
+    box-shadow: 0 0 0 transparent !important;
+}
+
+.btnCartCheckout:disabled {
+    background: #ccc !important;
+    box-shadow: none !important;
+    top: 0 !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 @media (max-width: 1024px) {
     .main-layout { grid-template-columns: 200px 1fr; }
     .actions-section { flex: 0 0 150px; }

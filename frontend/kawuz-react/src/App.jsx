@@ -57,10 +57,21 @@ export default function App() {
 
     const handleCheckout = async () => {
         if (cart.length === 0) return alert("Koszyk jest pusty");
-        if (!user) { alert("Musisz się zalogować, aby złożyć zamówienie."); setActiveModal('login'); return; }
+        if (!user) { 
+            alert("Musisz się zalogować, aby złożyć zamówienie."); 
+            setActiveModal('login'); 
+            return; 
+        }
 
         try {
-            const orderItems = cart.map(item => ({ productId: item.id, quantity: 1 }));
+            const orderItems = Object.values(
+                cart.reduce((acc, item) => {
+                    if (!acc[item.id]) acc[item.id] = { productId: item.id, quantity: 0 };
+                    acc[item.id].quantity += 1;
+                    return acc;
+                }, {})
+            );
+
             const res = await fetch(`${BASE}/order/create`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -68,10 +79,21 @@ export default function App() {
                 body: JSON.stringify(orderItems),
             });
 
-            if(res.ok) { alert("Zamówienie złożone!"); setCart([]); setRefreshKey(k => k+1); navigate('cart'); }
-            else alert("Błąd zamówienia");
-        } catch(err) { alert("Błąd: " + err.message); }
+            const text = await res.text(); // <-- odczytujemy body odpowiedzi
+
+            if(res.ok) { 
+                alert(text); // wyświetlamy dokładny komunikat z backendu
+                setCart([]);
+                setRefreshKey(k => k+1);
+                navigate('cart');
+            } else {
+                alert(text); // wyświetlamy dokładny komunikat błędu
+            }
+        } catch(err) { 
+            alert("Błąd: " + err.message); 
+        }
     };
+
 
     const handleLogout = async () => { await fetch(`${BASE}/auth/logout`, { method: "POST", credentials: "include" }); setUser(null); setCart([]); setMode('list'); setActiveTab('products'); };
 
@@ -146,7 +168,14 @@ export default function App() {
 
                 <Route path="/cart" element={<Cart
                     cart={cart}
-                    onRemove={(idx) => setCart(prev => prev.filter((_, i) => i !== idx))}
+                    onRemove={(id) => setCart(prev => {
+                        // usuwa tylko pierwsze wystąpienie produktu o danym id
+                        const index = prev.findIndex(p => p.id === id);
+                        if(index === -1) return prev;
+                        const newCart = [...prev];
+                        newCart.splice(index, 1);
+                        return newCart;
+                    })}
                     onCheckout={handleCheckout}
                 />} />
 

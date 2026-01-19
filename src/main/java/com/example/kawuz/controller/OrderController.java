@@ -21,19 +21,22 @@ public class OrderController {
 
     @PostMapping("/create")
     public ResponseEntity<String> placeOrder(@RequestBody List<OrderItem> items) {
+        //Sprawdzenie dostępności wszystkich produktów
         for (OrderItem item : items) {
             Product product = productService.getProductById(item.getProductId());
-
             if (product == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Nie znaleziono produktu: " + item.getProductId());
             }
-
             if (product.getStockQuantity() < item.getQuantity()) {
                 return ResponseEntity.badRequest()
                         .body("Nie ma wystarczającej liczby produktu: " + product.getName());
             }
+        }
 
+        // Odejmowanie ilości dopiero po sprawdzeniu wszystkich
+        for (OrderItem item : items) {
+            Product product = productService.getProductById(item.getProductId());
             product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
             product.setSales(product.getSales() + item.getQuantity());
             productService.updateProduct(product, product.getId());
@@ -41,7 +44,6 @@ public class OrderController {
 
         return ResponseEntity.ok("Zamówienie zostało złożone!");
     }
-
     public static class OrderItem {
         private int productId;
         private int quantity;

@@ -1,35 +1,81 @@
-// src/Cart.jsx
 import React from "react";
+import { getProductImage } from "./helpers.js";
 
 export default function Cart({ cart, onRemove, onCheckout }) {
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  const grouped = cart.reduce((acc, item) => {
+    if (!acc[item.id]) acc[item.id] = { ...item, quantity: 0 };
+    acc[item.id].quantity += 1;
+    return acc;
+  }, {});
+
+  const products = Object.values(grouped);
+  const total = products.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div>
-      <h2>Koszyk</h2>
-      {cart.length === 0 ? (
-        <div>Koszyk jest pusty</div>
+    <div className="products-page-wrapper">
+      <h2 style={{ textAlign: "center", marginBottom: 20 }}>Twój koszyk</h2>
+
+      {products.length === 0 ? (
+        <p style={{ textAlign: "center", fontSize: 18 }}>Koszyk jest pusty</p>
       ) : (
-        <ul>
-          {cart.map((item, idx) => (
-            <li key={idx} style={{ marginBottom: 5 }}>
-              {item.name} — {item.price} zł
-              <button
-                onClick={() => onRemove(idx)}
-                style={{ marginLeft: 10, padding: "2px 5px", backgroundColor: "#b33", color: "white" }}>
-                Usuń
-              </button>
+        <ul className="products-ul">
+          {products.map(item => (
+            <li key={item.id} className="productElement">
+              {/* Obrazek */}
+              <div className="img-container">
+                <img src={getProductImage(item.name)} alt={item.name} />
+              </div>
+
+              {/* Info o produkcie */}
+              <div className="product-info">
+                <h3>
+                  {item.name} <span style={{ fontWeight: "normal" }}>x{item.quantity}</span>
+                </h3>
+                <p className="description">{item.description}</p>
+
+                <div className="coffee-stats">
+                  {["roastLevel", "acidity", "caffeineLevel", "sweetness"].map((attr, idx) => (
+                    <div className="stat-row" key={idx}>
+                      <span className="stat-label">
+                        {attr === "roastLevel" ? "Palenie" :
+                         attr === "acidity" ? "Kwasowość" :
+                         attr === "caffeineLevel" ? "Kofeina" : "Słodycz"}:
+                      </span>
+                      <div className="dots">
+                        {[1, 2, 3].map(dot => (
+                          <span key={dot} className={`dot ${dot <= item[attr] ? "filled" : ""}`}></span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Akcje: cena + Usuń */}
+              <div className="actions-section">
+                <div className="price-row">
+                  <b>{(item.price * item.quantity).toFixed(2)} zł</b>
+                </div>
+                <button
+                    className="btnRemove"
+                    onClick={() => onRemove(item.id)}
+                  >
+                    Usuń
+                </button>
+              </div>
             </li>
           ))}
         </ul>
       )}
-      <div><b>Łącznie: {total.toFixed(2)} zł</b></div>
-      <button
-        onClick={onCheckout}
-        style={{ marginTop: 10, padding: "5px 10px", backgroundColor: "#4a4", color: "white" }}
-      >
-        Złóż zamówienie
-      </button>
+
+      {products.length > 0 && (
+        <div style={{ textAlign: "center", marginTop: 20 }}>
+          <h3 style={{ marginBottom: 15 }}>Łącznie: {total.toFixed(2)} zł</h3>
+          <button className="btnCartCheckout" onClick={onCheckout}>
+            Złóż zamówienie
+          </button>
+        </div>
+      )}
     </div>
   );
 }
