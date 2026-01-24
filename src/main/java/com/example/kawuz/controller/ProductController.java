@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.lowagie.text.*;
-import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.*;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import com.lowagie.text.pdf.BaseFont;
+import java.awt.Color;
 
 import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.*;
@@ -134,35 +134,93 @@ public class ProductController {
         }
 
         response.setContentType("application/pdf");
-        String headerKey = "Content-Disposition";
         String filename = "oferta_" + product.getName().replace(" ", "_") + ".pdf";
-        response.setHeader(headerKey, "attachment; filename=" + filename);
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
 
         Document document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, response.getOutputStream());
-
         document.open();
 
-        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, BaseFont.CP1250, BaseFont.EMBEDDED, 20);
-        Font fontText = FontFactory.getFont(FontFactory.HELVETICA, BaseFont.CP1250, BaseFont.EMBEDDED, 12);
+        BaseFont helvetica = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1250, BaseFont.EMBEDDED);
+        BaseFont helveticaBold = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1250, BaseFont.EMBEDDED);
 
-        Paragraph title = new Paragraph("Oferta KawUZ: " + product.getName(), fontTitle);
-        title.setAlignment(Paragraph.ALIGN_CENTER);
+        Font fontTitle = new Font(helveticaBold, 22, Font.NORMAL);
+        Font fontPrice = new Font(helveticaBold, 16, Font.NORMAL, Color.RED);
+        Font fontNormal = new Font(helvetica, 12, Font.NORMAL);
+        Font fontLabel = new Font(helveticaBold, 12, Font.NORMAL);
+        BaseFont arial = BaseFont.createFont("c:/windows/fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font fontDots = new Font(arial, 16, Font.NORMAL, Color.DARK_GRAY);
+
+        Paragraph title = new Paragraph(product.getName(), fontTitle);
+        title.setAlignment(Element.ALIGN_CENTER);
+        title.setSpacingAfter(20);
         document.add(title);
 
-        document.add(new Paragraph("\n"));
+        PdfPTable table = new PdfPTable(2);
+        table.setWidthPercentage(100);
+        table.setWidths(new int[]{4, 6});
 
-        document.add(new Paragraph("Cena: " + product.getPrice() + " zł", fontText));
+        PdfPCell imageCell = new PdfPCell();
+        imageCell.setBorder(Rectangle.NO_BORDER);
+        imageCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        try {
+            String imagePath = UPLOAD_DIR + product.getName() + ".png";
+            Image img = Image.getInstance(imagePath);
+            img.scaleToFit(180, 250);
+            imageCell.addElement(img);
+        } catch (Exception e) {
+            System.out.println("Nie znaleziono zdjęcia dla PDF: " + e.getMessage());
+            Paragraph noPhoto = new Paragraph("\n[Brak zdjęcia poglądowego]\n", fontNormal);
+            noPhoto.setAlignment(Element.ALIGN_CENTER);
+            imageCell.addElement(noPhoto);
+        }
+        table.addCell(imageCell);
+
+        PdfPCell textCell = new PdfPCell();
+        textCell.setBorder(Rectangle.NO_BORDER);
+        textCell.setPaddingLeft(20);
+
+        textCell.addElement(new Paragraph(product.getPrice() + " zł", fontPrice));
+        textCell.addElement(new Paragraph("Waga: " + product.getWeight(), fontNormal));
+
+        textCell.addElement(new Paragraph(" ", fontNormal));
 
         if (product.getDescription() != null) {
-            document.add(new Paragraph("\nOpis:", fontText));
-            document.add(new Paragraph(product.getDescription(), fontText));
+            textCell.addElement(new Paragraph("O kawie:", fontLabel));
+            textCell.addElement(new Paragraph(product.getDescription(), fontNormal));
         }
 
+        textCell.addElement(new Paragraph(" ", fontNormal));
+
+        textCell.addElement(new Paragraph("Palenie:       " + makeDots(product.getRoastLevel()), fontDots));
+        textCell.addElement(new Paragraph("Kwasowość:  " + makeDots(product.getAcidity()), fontDots));
+        textCell.addElement(new Paragraph("Słodycz:       " + makeDots(product.getSweetness()), fontDots));
+        textCell.addElement(new Paragraph("Kofeina:       " + makeDots(product.getCaffeineLevel()), fontDots));
+
+        table.addCell(textCell);
+
+        document.add(table);
+
         document.add(new Paragraph("\n\n-----------------------------"));
-        document.add(new Paragraph("Wygenerowano z KawUZ", FontFactory.getFont(FontFactory.COURIER, BaseFont.CP1250, BaseFont.EMBEDDED, 10)));
+        document.add(new Paragraph("Wygenerowano z aplikacji KawUZ", new Font(helvetica, 10, Font.ITALIC, Color.GRAY)));
 
         document.close();
+    }
+
+    // --- Metoda pomocnicza do rysowania kropek (●●●○○) ---
+    private String makeDots(int level) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            if (i < level) {
+                // Używam "O" jako pełnej kropki i "-" jako pustej, bo standardowe kropki unicode
+                // mogą czasem znikać w starych wersjach PDF, ale spróbujmy kropek:
+                sb.append("●");
+            } else {
+                sb.append("○");
+            }
+        }
+        return sb.toString();
     }
 
     private void saveImage(MultipartFile file, String productName) {
