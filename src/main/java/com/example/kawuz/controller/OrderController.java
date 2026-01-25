@@ -1,6 +1,9 @@
 package com.example.kawuz.controller;
 
 import com.example.kawuz.entity.Product;
+import com.example.kawuz.entity.User;
+import com.example.kawuz.repository.UserRepository;
+import com.example.kawuz.security.JwtUtil;
 import com.example.kawuz.service.EmailService;
 import com.example.kawuz.service.ProductService;
 import org.springframework.http.HttpStatus;
@@ -8,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -16,24 +20,39 @@ public class OrderController {
 
     private final ProductService productService;
     private final EmailService emailService;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
-    public OrderController(ProductService productService, EmailService emailService) {
+    public OrderController(ProductService productService, EmailService emailService, UserRepository userRepository, JwtUtil jwtUtil) {
         this.productService = productService;
         this.emailService = emailService;
+        this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> placeOrder(@RequestBody List<OrderItem> items) {
+    public ResponseEntity<Map<String, String>>  placeOrder(@RequestBody List<OrderItem> items,
+                                             @CookieValue(name = "auth_token", required = false) String token) {
+
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "order.notLoggedIn"));
+        }
+
+        String username = jwtUtil.getUsernameFromToken(token);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono użytkownika: " + username));
+
         //Sprawdzenie dostępności wszystkich produktów
         for (OrderItem item : items) {
             Product product = productService.getProductById(item.getProductId());
             if (product == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Nie znaleziono produktu: " + item.getProductId());
+                        .body(Map.of("message", "order.productNotFound"));
             }
             if (product.getStockQuantity() < item.getQuantity()) {
                 return ResponseEntity.badRequest()
-                        .body("Nie ma wystarczającej liczby produktu: " + product.getName());
+                        .body(Map.of("message", "order.notEnoughStock", "productName", product.getName()));
             }
         }
 
@@ -47,12 +66,12 @@ public class OrderController {
 
         String summary = buildOrderSummary(items); // możesz użyć swojej metody podsumowania
         emailService.sendOrderEmail(
-                "113080@g.elearn.uz.zgora.pl",
+                user.getEmail(),
                 "Podsumowanie zamówienia",
                 summary
         );
 
-        return ResponseEntity.ok("Zamówienie zostało złożone!");
+        return ResponseEntity.ok(Map.of("message", "order.success"));
     }
     public static class OrderItem {
         private int productId;

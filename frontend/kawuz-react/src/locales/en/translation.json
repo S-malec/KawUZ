@@ -46,10 +46,13 @@
     "username": "Username",
     "password": "Password",
     "submit": "Sign in",
-    "success": "✅ Logged in!",
-    "error": "Login error.",
+    "success": "Login successful!",
+    "error": "Invalid username or password",
     "connectionError": "Server connection error.",
     "noAccount": "Create account"
+  },
+  "captcha": {
+    "required": "Please confirm you are not a robot!"
   },
   "cart": {
     "title": "Your cart",
@@ -59,7 +62,12 @@
     "total": "Total",
     "checkout": "Checkout"
   },
-
+  "order": {
+    "success": "Order has been placed!",
+    "notLoggedIn": "You must be logged in to place an order!",
+    "productNotFound": "Product not found.",
+    "notEnoughStock": "Not enough stock for product: {{productName}}"
+  },
   "product": {
     "name": "Name",
     "price": "Price",
@@ -133,7 +141,7 @@
     "backToList": "Back to list",
     "loading": "Loading...",
     "loadingData": "Loading data...",
-    "connectionError": "Connection error.",
+    "connectionError": "Server connection error.",
     "pln": "PLN"
   },
   "error": {

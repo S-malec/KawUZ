@@ -54,7 +54,7 @@ export default function Cart({ cart, onRemove, onCheckout }) {
               {/* Akcje: cena + Usuń */}
               <div className="actions-section">
                 <div className="price-row">
-                  <b>{(item.price * item.quantity).toFixed(2)} zł</b>
+                  <b>{(item.price * item.quantity).toFixed(2)} {t("common.pln")}</b>
                 </div>
                 <button
                     className="btnRemove"
@@ -70,7 +70,7 @@ export default function Cart({ cart, onRemove, onCheckout }) {
 
       {products.length > 0 && (
         <div style={{ textAlign: "center", marginTop: 20 }}>
-          <h3 style={{ marginBottom: 15 }}>{t("cart.total")}: {total.toFixed(2)} zł</h3>
+          <h3 style={{ marginBottom: 15 }}>{t("cart.total")}: {total.toFixed(2)} {t("common.pln")}</h3>
           <button className="btnCartCheckout" onClick={onCheckout}>
             {t("cart.checkout")}
           </button>

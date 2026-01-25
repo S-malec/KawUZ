@@ -13,7 +13,7 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, is
     const { t } = useTranslation();
     const handleLogin = async () => {
         if (!captchaToken) {
-            setMsg("Potwierdź, że nie jesteś robotem!");
+            setMsg(t("captcha.required"));
             return;
         }
 
@@ -38,11 +38,11 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, is
                     isAdmin: data.isAdmin
                 }), 500);
             } else {
-                setMsg("⚠️ " + (data.message || t("login.error")));
+                setMsg("⚠️ " + t(data.message || "login.error"));
                 setCaptchaToken(null);
             }
         } catch (err) {
-            setMsg("Błąd połączenia z serwerem.");
+            setMsg(t("common.connectionError"));
         }
     };
 

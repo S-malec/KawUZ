@@ -46,10 +46,13 @@
     "username": "Login",
     "password": "Hasło",
     "submit": "Zaloguj się",
-    "success": "✅ Zalogowano!",
-    "error": "Błąd logowania.",
+    "success": "Zalogowano pomyślnie!",
+    "error": "Nieprawidłowy login lub hasło",
     "connectionError": "Błąd połączenia z serwerem.",
     "noAccount": "Nie mam konta"
+  },
+  "captcha": {
+    "required": "Potwierdź, że nie jesteś robotem!"
   },
   "cart": {
     "title": "Twój koszyk",
@@ -58,6 +61,12 @@
     "remove": "Usuń",
     "total": "Łącznie",
     "checkout": "Złóż zamówienie"
+  },
+  "order": {
+    "success": "Zamówienie zostało złożone!",
+    "notLoggedIn": "Musisz być zalogowany, aby złożyć zamówienie!",
+    "productNotFound": "Nie znaleziono produktu.",
+    "notEnoughStock": "Nie ma wystarczającej liczby produktu: {{productName}}"
   },
   "product": {
     "name": "Nazwa",

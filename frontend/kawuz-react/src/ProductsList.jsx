@@ -189,10 +189,10 @@ function ProductsList({ onSelect, onAddToCart }) {
                                 <div className="actions-section">
                                     <h5>{p.stockQuantity >= 1 ? t("product.available") : t("product.unavailable")}</h5>
                                     <div className="weight-info">
-                                        Opakowanie: <strong>{p.weight}</strong>
+                                        {t("product.package")}: <strong>{p.weight}</strong>
                                     </div>
                                     <div className="price-row">
-                                        <b className="price">{p.price} zł</b>
+                                        <b className="price">{p.price} {t("common.pln")}</b>
                                     </div>
                                     <button
                                         onClick={(e) => {
