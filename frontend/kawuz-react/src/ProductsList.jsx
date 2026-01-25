@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getProductImage } from "./helpers.js";
 import { useNavigate } from "react-router-dom";
 import "./css/ProductsList.css";
+import { useTranslation } from "react-i18next";
 
 /** * @constant BASE
  * @brief Adres bazowy API dla zasobów produktów.
@@ -36,6 +37,7 @@ function ProductsList({ onSelect, onAddToCart }) {
     /** @brief Flaga wskazująca na trwające pobieranie danych. */
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     /** @brief Stan przechowujący aktywne kryteria filtrowania. */
     const [filters, setFilters] = useState(initialFilters);
@@ -113,7 +115,7 @@ function ProductsList({ onSelect, onAddToCart }) {
         </div>
     );
 
-    if (loading) return <div>Ładowanie...</div>;
+    if (loading) return <div>{t("products.loading")}</div>;
 
     return (
         <div className="products-page-wrapper">
@@ -122,7 +124,7 @@ function ProductsList({ onSelect, onAddToCart }) {
 
                 <input
                     type="text"
-                    placeholder="Szukaj kawy..."
+                    placeholder={t("products.search")}
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     className="search-input"
@@ -134,67 +136,67 @@ function ProductsList({ onSelect, onAddToCart }) {
                         value={sortOrder}
                         onChange={(e) => setSortOrder(e.target.value)}
                     >
-                        <option value="">Sortuj: Domyślnie</option>
-                        <option value="asc">Cena: Rosnąco</option>
-                        <option value="desc">Cena: Malejąco</option>
+                        <option value="">{t("products.sort.default")}</option>
+                        <option value="asc">{t("products.sort.asc")}</option>
+                        <option value="desc">{t("products.sort.desc")}</option>
                     </select>
                 </div>
             </div>
 
             <div className="main-layout">
                 <aside className="sidebar">
-                    <h3>Filtry</h3>
+                    <h3>{t("filters.title")}</h3>
                     <div className="filter-section">
-                        <label>Stopień palenia</label>
+                        <label>{t("filters.roast")}</label>
                         <select className="filter-select" onChange={(e) => handleFilterChange('roastLevel', e.target.value)} value={filters.roastLevel[0] || ""}>
-                            <option value="">Wszystkie</option>
-                            <option value="1">Jasne</option>
-                            <option value="2">Średnie</option>
-                            <option value="3">Ciemne</option>
+                            <option value="">{t("filters.all")}</option>
+                            <option value="1">{t("filters.roast1")}</option>
+                            <option value="2">{t("filters.roast2")}</option>
+                            <option value="3">{t("filters.roast3")}</option>
                         </select>
                     </div>
 
                     <div className="filter-section">
-                        <label>Kwasowość</label>
+                        <label>{t("filters.acidity")}</label>
                         <select className="filter-select" onChange={(e) => handleFilterChange('acidity', e.target.value)} value={filters.acidity[0] || ""}>
-                            <option value="">Wszystkie</option>
-                            <option value="1">Niska</option>
-                            <option value="2">Zrównoważona</option>
-                            <option value="3">Wysoka</option>
+                            <option value="">{t("filters.all")}</option>
+                            <option value="1">{t("filters.acidity1")}</option>
+                            <option value="2">{t("filters.acidity2")}</option>
+                            <option value="3">{t("filters.acidity3")}</option>
                         </select>
                     </div>
 
                     <div className="filter-section">
-                        <label>Kofeina</label>
+                        <label>{t("filters.caffeine")}</label>
                         <select className="filter-select" onChange={(e) => handleFilterChange('caffeineLevel', e.target.value)} value={filters.caffeineLevel[0] || ""}>
-                            <option value="">Wszystkie</option>
-                            <option value="1">Niska</option>
-                            <option value="2">Średnia</option>
-                            <option value="3">Wysoka</option>
+                            <option value="">{t("filters.all")}</option>
+                            <option value="1">{t("filters.low")}</option>
+                            <option value="2">{t("filters.medium")}</option>
+                            <option value="3">{t("filters.high")}</option>
                         </select>
                     </div>
 
                     <div className="filter-section">
-                        <label>Słodycz</label>
+                        <label>{t("filters.sweetness")}</label>
                         <select className="filter-select" onChange={(e) => handleFilterChange('sweetness', e.target.value)} value={filters.sweetness[0] || ""}>
-                            <option value="">Wszystkie</option>
-                            <option value="1">Wytrawna</option>
-                            <option value="2">Zrównoważona</option>
-                            <option value="3">Słodka</option>
+                            <option value="">{t("filters.all")}</option>
+                            <option value="1">{t("filters.dry")}</option>
+                            <option value="2">{t("filters.balanced")}</option>
+                            <option value="3">{t("filters.sweet")}</option>
                         </select>
                     </div>
 
                     <div className="filter-section">
-                        <label>Waga opakowania</label>
+                        <label>{t("filters.weight")}</label>
                         <select className="filter-select" onChange={(e) => handleFilterChange('weight', e.target.value)} value={filters.weight[0] || ""}>
-                            <option value="">Wszystkie</option>
+                            <option value="">{t("filters.all")}</option>
                             <option value="500g">500g</option>
                             <option value="1000g">1000g</option>
                         </select>
                     </div>
 
                     <button className="reset-filters-btn" onClick={resetFilters}>
-                        Resetuj filtry
+                        {t("filters.reset")}
                     </button>
                 </aside>
 
@@ -211,20 +213,20 @@ function ProductsList({ onSelect, onAddToCart }) {
                                     <p className="description">{p.description}</p>
 
                                     <div className="coffee-stats">
-                                        <CoffeeAttribute label="Palenie" value={p.roastLevel} />
-                                        <CoffeeAttribute label="Kwasowość" value={p.acidity} />
-                                        <CoffeeAttribute label="Kofeina" value={p.caffeineLevel} />
-                                        <CoffeeAttribute label="Słodycz" value={p.sweetness} />
+                                        <CoffeeAttribute label={t("product.roastLevel")} value={p.roastLevel} />
+                                        <CoffeeAttribute label={t("product.acidity")} value={p.acidity} />
+                                        <CoffeeAttribute label={t("product.caffeineLevel")} value={p.caffeineLevel} />
+                                        <CoffeeAttribute label={t("product.sweetness")} value={p.sweetness} />
                                     </div>
                                 </div>
 
                                 <div className="actions-section">
-                                    <h5>{p.stockQuantity >= 1 ? "DOSTĘPNY" : "BRAK"}</h5>
+                                    <h5>{p.stockQuantity >= 1 ? t("product.available") : t("product.unavailable")}</h5>
                                     <div className="weight-info">
-                                        Opakowanie: <strong>{p.weight}</strong>
+                                        {t("product.package")}: <strong>{p.weight}</strong>
                                     </div>
                                     <div className="price-row">
-                                        <b className="price">{p.price} zł</b>
+                                        <b className="price">{p.price} {t("common.pln")}</b>
                                     </div>
                                     <button
                                         onClick={(e) => {
@@ -234,13 +236,13 @@ function ProductsList({ onSelect, onAddToCart }) {
                                         className="btnCart"
                                         disabled={Number(p.stockQuantity) <= 0}
                                     >
-                                        {Number(p.stockQuantity) > 0 ? "Dodaj do koszyka" : "Brak na stanie"}
+                                        {Number(p.stockQuantity) > 0 ? t("product.addToCart") : t("product.outOfStock")}
                                     </button>
                                 </div>
                             </li>
                         ))}
                     </ul>
-                    {sortedProducts.length === 0 && <p>Nie znaleziono kawy spełniającej te kryteria.</p>}
+                    {sortedProducts.length === 0 && <p>{t("products.notFound")}</p>}
                 </div>
             </div>
         </div>

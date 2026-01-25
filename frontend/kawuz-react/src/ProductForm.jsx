@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useTranslation } from "react-i18next";
 
 /** * @constant API_URL
  * @brief Adres bazowy API dla operacji na produktach.
  */
+
 const API_URL = 'http://localhost:8080/api/product';
 
 /**
@@ -16,6 +18,8 @@ const API_URL = 'http://localhost:8080/api/product';
  * @param {Function} [props.onProductSaved] Callback wywoływany po pomyślnym zapisaniu danych.
  */
 function ProductForm({ initialProduct = {}, onProductSaved }) {
+    /** @brief Funkcja służąca do tłumaczenia kluczy tekstowych na aktualny język. */
+    const { t } = useTranslation();
     /** @brief Stan przechowujący dane tekstowe i liczbowe produktu. */
     const [productData, setProductData] = useState({
         name: initialProduct.name || '',
@@ -95,31 +99,31 @@ function ProductForm({ initialProduct = {}, onProductSaved }) {
 
         } catch (error) {
             console.error('Błąd zapisu:', error);
-            alert('Wystąpił błąd podczas zapisywania produktu.');
+            alert(t("admin.saveError"));
         }
     };
 
     return (
         <form onSubmit={handleSubmit} style={{ maxWidth: '400px', margin: '20px' }}>
-            <h2>{isEditMode ? 'Edytuj Produkt' : 'Dodaj Nowy Produkt'}</h2>
+            <h2>{isEditMode ? t("admin.editProduct") : t("admin.addProduct")}</h2>
 
             <div>
-                <label>Nazwa:</label>
+                <label>{t("product.name")}:</label>
                 <input type="text" name="name" value={productData.name} onChange={handleChange} required />
             </div>
 
             <div>
-                <label>Opis:</label>
+                <label>{t("product.description")}:</label>
                 <textarea name="description" value={productData.description} onChange={handleChange}></textarea>
             </div>
 
             <div>
-                <label>Cena:</label>
+                <label>{t("product.price")}:</label>
                 <input type="number" name="price" value={productData.price} onChange={handleChange} required min="0" step="0.01" />
             </div>
 
             <div>
-                <label>Ilość na magazynie:</label>
+                <label>{t("product.stock")}:</label>
                 <input
                     type="number"
                     name="stockQuantity"
@@ -130,12 +134,12 @@ function ProductForm({ initialProduct = {}, onProductSaved }) {
             </div>
 
             <div style={{ margin: '10px 0' }}>
-                <label>Zdjęcie produktu:</label>
+                <label>{t("product.image")}:</label>
                 <input type="file" accept="image/*" onChange={handleFileChange} />
             </div>
 
             <button type="submit">
-                {isEditMode ? 'Zapisz Zmiany' : 'Dodaj Produkt'}
+                {isEditMode ? t("common.save") : t("admin.addProductBtn")}
             </button>
         </form>
     );

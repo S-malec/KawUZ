@@ -9,6 +9,8 @@ import Login from './Login';
 import Register from './Register';
 import Top10Products from './Top10Products';
 import "./css/App.css"
+import i18n from "./i18n";
+import {useTranslation} from "react-i18next";
 
 /**
  * @constant BASE
@@ -48,6 +50,14 @@ export default function App() {
 
     /** @brief Stan motywu kolorystycznego. */
     const [theme, setTheme] = useState('light');
+    /** @brief Funkcja służąca do tłumaczenia kluczy tekstowych na aktualny język. */
+    const { t, i18n } = useTranslation();
+
+    /** @brief Przełącza język aplikacji między polskim a angielskim. */
+    const toggleLanguage = () => {
+        const nextLang = i18n.language === "pl" ? "en" : "pl";
+        i18n.changeLanguage(nextLang);
+    };
 
     /**
      * @brief Efekt inicjalizujący motyw na podstawie danych z localStorage.
@@ -95,11 +105,11 @@ export default function App() {
      * 3. Czyści koszyk po sukcesie.
      */
     const handleCheckout = async () => {
-        if (cart.length === 0) return alert("Koszyk jest pusty");
-        if (!user) {
-            alert("Musisz się zalogować, aby złożyć zamówienie.");
-            setActiveModal('login');
-            return;
+        if (cart.length === 0) return alert(t("cart.empty"));
+        if (!user) { 
+            alert(t("auth.loginRequired"));
+            setActiveModal('login'); 
+            return; 
         }
 
         try {
@@ -129,7 +139,7 @@ export default function App() {
                 alert(text);
             }
         } catch(err) {
-            alert("Błąd: " + err.message);
+            alert(t("error.generic", { message: err.message }));
         }
     };
 
@@ -162,25 +172,28 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     {user ? (
                         <>
-                            <span style={{color: 'var(--text)'}}>Witaj, <b>{user.username}</b>!</span>
+                            <span style={{color: 'var(--text)'}}>{t("header.welcome")}, <b>{user.username}</b>!</span>
                             {user.isAdmin && (
-                                <button onClick={() => navigate('/admin')}>Panel Admina</button>
+                                <button onClick={() => navigate('/admin')}>{t("header.adminPanel")}</button>
                             )}
-                            <button onClick={handleLogout}>Wyloguj</button>
+                            <button onClick={handleLogout}>{t("header.logout")}</button>
                         </>
                     ) : (
                         <button onClick={() => setActiveModal('login')}>
-                            Zaloguj się
+                            {t("header.login")}
                         </button>
                     )}
                     <button onClick={() => navigate('/cart')} style={{ marginLeft: 10 }}>
-                        Koszyk ({cart.length})
+                        {t("header.cart")} ({cart.length})
                     </button>
                     <button onClick={() => navigate('/top10')} style={{ fontWeight: 'bold' }}>
                         🏆 Top 10
                     </button>
                     <button onClick={toggleTheme} style={{padding: '10px 10px'}}>
-                        {theme === 'light' ? 'Tryb ciemny' : 'Tryb jasny'}
+                        {theme === 'light' ? t("header.darkMode") : t("header.lightMode")}
+                    </button>
+                    <button onClick={toggleLanguage}>
+                        {i18n.language === "pl" ? "EN" : "PL"}
                     </button>
                 </div>
             </div>

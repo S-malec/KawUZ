@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha"; //
 import "./css/Login.css";
+import { useTranslation } from "react-i18next";
 
 /** * @constant BASE
  * @brief Adres bazowy dla endpointów uwierzytelniania i rejestracji.
  */
+
 const BASE = "http://localhost:8080/api";
 
 /**
@@ -31,12 +33,18 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
     /** @brief Wiadomość zwrotna dla użytkownika (sukces/błąd). */
     const [msg, setMsg] = useState('');
 
+
+    /** @brief Funkcja służąca do tłumaczenia kluczy tekstowych na aktualny język. */
+    const { t } = useTranslation();
+
     /**
      * @brief Obsługuje proces przesyłania danych rejestracyjnych.
      * * Weryfikuje obecność tokena Captcha, tworzy obiekt żądania
      * i wysyła go do endpointu /auth/register.
      * * @param {Event} e Obiekt zdarzenia formularza.
      */
+    
+
     const handleRegister = async (e) => {
         e.preventDefault();
 
@@ -68,16 +76,16 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
             }
 
             if (res.ok) {
-                setMsg("✅ Zarejestrowano!");
+                setMsg(t("register.success"));
                 setTimeout(() => onSwitchToLogin(), 1500);
             } else {
-                setMsg("⚠️ " + (data.message || "Błąd rejestracji."));
+                setMsg("⚠️ " + (data.message || t("register.error")));
                 // Opcjonalnie: Resetujemy captchę przy błędzie (wymuszenie ponownego kliknięcia)
                 setCaptchaToken(null);
             }
         } catch (err) {
             console.error(err);
-            setMsg("Błąd połączenia.");
+            setMsg(t("register.connectionError"));
         }
     };
 
@@ -94,9 +102,9 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
     /** @brief Treść formularza wyekstrahowana do spójnego renderowania w różnych trybach. */
     const formContent = (
         <form onSubmit={handleRegister} className="auth-card">
-            <h3>Rejestracja</h3>
+            <h3>{t("register.title")}</h3>
             <input
-                placeholder="Login"
+                placeholder={t("register.username")}
                 required
                 onChange={e => setFormData({...formData, username: e.target.value})}
                 value={formData.username}
@@ -110,7 +118,7 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
             />
             <input
                 type="password"
-                placeholder="Hasło"
+                placeholder={t("register.password")}
                 required
                 onChange={e => setFormData({...formData, password: e.target.value})}
                 value={formData.password}
@@ -123,13 +131,13 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
                 />
             </div>
 
-            <button type="submit">Zarejestruj się</button>
-            <button type="button" onClick={isModal ? onClose : onCancel}>Anuluj</button>
+            <button type="submit">{t("register.submit")}</button>
+            <button type="button" onClick={isModal ? onClose : onCancel}>{t("common.cancel")}</button>
 
             <p>{msg}</p>
 
             <button type="button" onClick={onSwitchToLogin} className="switch-login">
-                Mam już konto
+                {t("register.haveAccount")}
             </button>
         </form>
     );

@@ -2,6 +2,7 @@ package com.example.kawuz;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * @class KawUzApplication
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * komponentów oraz uruchomienie wbudowanego serwera aplikacji.
  */
 @SpringBootApplication
+@EnableAsync
 public class KawUzApplication {
 
     /**

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import "./css/AdminPanel.css";
-
+import { useTranslation } from "react-i18next";
 /** @constant BASE
  * @brief Adres bazowy API dla operacji administracyjnych.
  */
@@ -19,6 +19,9 @@ const BASE = "http://localhost:8080/api";
  * @param {Function} props.forceRefresh Funkcja wymuszająca odświeżenie danych w nadrzędnych komponentach (np. liście głównej).
  */
 function AdminPanel({ forceRefresh }) {
+    /** @brief Funkcja służąca do tłumaczenia kluczy tekstowych na aktualny język. */
+    const { t } = useTranslation();
+
     /** @brief Lista wszystkich produktów pobrana do celów administracyjnych. */
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -188,10 +191,10 @@ function AdminPanel({ forceRefresh }) {
                 resetForm();
                 setRefreshListKey(k => k + 1);
                 forceRefresh?.();
-                setMsg("Zapisano pomyślnie.");
+                setMsg(t("admin.saveSuccess"));
                 setTimeout(() => setMsg(""), 3000);
             }
-        } catch (e) { setMsg("Błąd połączenia."); }
+        } catch (e) { setMsg(t("common.connectionError")); }
     };
 
     /**
@@ -199,40 +202,40 @@ function AdminPanel({ forceRefresh }) {
      * @param {number} id Unikalny identyfikator produktu.
      */
     const handleDelete = async (id) => {
-        if (!confirm("Potwierdź usunięcie produktu")) return;
+        if (!confirm(t("admin.confirmDelete"))) return;
         try {
             const res = await fetch(`${BASE}/product/${id}`, { method: "DELETE", credentials: 'include' });
             if (res.ok) {
                 setRefreshListKey(k => k + 1);
                 forceRefresh?.();
             }
-        } catch (e) { alert("Błąd usuwania."); }
+        } catch (e) { alert(t("admin.deleteError")); }
     };
 
-    if (loading && products.length === 0) return <div className="admin-wrapper">Ładowanie danych...</div>;
+    if (loading && products.length === 0) return <div className="admin-wrapper">{t("common.loadingData")}</div>;
 
     return (
         <div className="admin-wrapper">
             <div className="admin-content">
                 <section className="form-container">
-                    <h2 className="section-title-clean">{isEditing ? "EDYCJA PRODUKTU" : "NOWY PRODUKT"}</h2>
+                    <h2 className="section-title-clean">{isEditing ? t("admin.editProduct") : t("admin.newProduct")}</h2>
                     <form className="product-form-grid" onSubmit={handleSubmit}>
                         <div className="input-group full-width">
-                            <label>Nazwa</label>
+                            <label>{t("product.name")}</label>
                             <input name="name" value={formData.name} onChange={handleChange} required />
                         </div>
 
                         <div className="form-row-triple full-width">
                             <div className="input-group">
-                                <label>Cena (PLN)</label>
+                                <label>{t("product.price")} (PLN)</label>
                                 <input type="number" step="0.01" name="price" value={formData.price} onChange={handleChange} required />
                             </div>
                             <div className="input-group">
-                                <label>Ilość (szt.)</label>
+                                <label>{t("product.stock")} ({t("common.pcs")})</label>
                                 <input type="number" name="stockQuantity" value={formData.stockQuantity} onChange={handleChange} required />
                             </div>
                             <div className="input-group">
-                                <label>Waga</label>
+                                <label>{t("product.weight")}</label>
                                 <select name="weight" value={formData.weight} onChange={handleChange}>
                                     <option value="500g">500g</option>
                                     <option value="1000g">1000g</option>
@@ -241,7 +244,7 @@ function AdminPanel({ forceRefresh }) {
                         </div>
 
                         <div className="input-group full-width">
-                            <label>Opis</label>
+                            <label>{t("product.description")}</label>
                             <textarea name="description" value={formData.description} onChange={handleChange} rows="2" />
                         </div>
 
@@ -255,22 +258,22 @@ function AdminPanel({ forceRefresh }) {
                         </div>
 
                         <div className="input-group full-width">
-                            <label>Zdjęcie produktu (.png)</label>
+                            <label>{t("product.image")} (.png)</label>
                             <div className="image-upload-wrapper" onClick={() => document.getElementById('image-upload').click()}>
                                 {previewUrl ? (
                                     <img src={previewUrl} alt="Podgląd" className="image-preview-box" />
                                 ) : isEditing && formData.name ? (
                                     <img src={`/images/${formData.name}.png`} alt="Aktualne" className="image-preview-box" onError={(e) => e.target.style.display = 'none'} />
                                 ) : (
-                                    <div className="image-placeholder">Kliknij, aby dodać zdjęcie</div>
+                                    <div className="image-placeholder">{t("product.clickToAddImage")}</div>
                                 )}
                                 <input id="image-upload" type="file" accept="image/png" onChange={handleFileChange} style={{ display: 'none' }} />
                             </div>
                         </div>
 
                         <div className="form-actions-centered full-width">
-                            <button type="submit" className="btn-save">ZATWIERDŹ</button>
-                            {isEditing && <button type="button" className="btn-cancel" onClick={resetForm}>ANULUJ</button>}
+                            <button type="submit" className="btn-save">{t("common.confirm")}</button>
+                            {isEditing && <button type="button" className="btn-cancel" onClick={resetForm}>{t("common.cancel")}</button>}
                         </div>
                     </form>
                     {msg && <p className="status-msg" style={{textAlign: 'center', marginTop: '10px', color: 'var(--primary)'}}>{msg}</p>}
@@ -278,11 +281,11 @@ function AdminPanel({ forceRefresh }) {
 
                 <section className="table-container">
                     <div className="table-controls">
-                        <h2 className="section-title-clean">BAZA PRODUKTÓW</h2>
+                        <h2 className="section-title-clean">{t("admin.productDatabase")}</h2>
                         <input
                             type="text"
                             className="admin-search-input"
-                            placeholder="Szukaj po nazwie lub ID..."
+                            placeholder={t("admin.searchPlaceholder")}
                             style={{ maxWidth: '400px' }}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -294,11 +297,11 @@ function AdminPanel({ forceRefresh }) {
                             <thead>
                             <tr>
                                 <th onClick={() => requestSort('id')} className="sortable">ID <span>{getSortIcon('id')}</span></th>
-                                <th onClick={() => requestSort('name')} className="sortable">Nazwa <span>{getSortIcon('name')}</span></th>
-                                <th onClick={() => requestSort('price')} className="sortable">Cena <span>{getSortIcon('price')}</span></th>
-                                <th onClick={() => requestSort('weight')} className="sortable">Waga <span>{getSortIcon('weight')}</span></th>
-                                <th onClick={() => requestSort('stockQuantity')} className="sortable">Ilość <span>{getSortIcon('stockQuantity')}</span></th>
-                                <th className="text-right">Akcje</th>
+                                <th onClick={() => requestSort('name')} className="sortable">{t("product.name")} <span>{getSortIcon('name')}</span></th>
+                                <th onClick={() => requestSort('price')} className="sortable">{t("product.price")} <span>{getSortIcon('price')}</span></th>
+                                <th onClick={() => requestSort('weight')} className="sortable">{t("product.weight")} <span>{getSortIcon('weight')}</span></th>
+                                <th onClick={() => requestSort('stockQuantity')} className="sortable">{t("product.stock")} <span>{getSortIcon('stockQuantity')}</span></th>
+                                <th className="text-right">{t("common.actions")}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -312,11 +315,11 @@ function AdminPanel({ forceRefresh }) {
                                     <td>{parseFloat(p.price).toFixed(2)} zł</td>
                                     <td>{p.weight}</td>
                                     <td style={{ color: p.stockQuantity <= 0 ? '#e53e3e' : 'inherit', fontWeight: p.stockQuantity <= 0 ? 'bold' : 'normal' }}>
-                                        {p.stockQuantity > 0 ? `${p.stockQuantity} szt.` : "Brak"}
+                                        {p.stockQuantity > 0 ? `${p.stockQuantity} ${t("common.pcs")}` : t("common.outOfStock")}
                                     </td>
                                     <td className="text-right">
-                                        <button className="btn-edit-link" onClick={() => handleEdit(p)}>Edytuj</button>
-                                        <button className="btn-delete-link" onClick={() => handleDelete(p.id)}>Usuń</button>
+                                        <button className="btn-edit-link" onClick={() => handleEdit(p)}>{t("common.edit")}</button>
+                                        <button className="btn-delete-link" onClick={() => handleDelete(p.id)}>{t("common.delete")}</button>
                                     </td>
                                 </tr>
                             ))}

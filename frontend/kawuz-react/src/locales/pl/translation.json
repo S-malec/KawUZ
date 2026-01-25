@@ -1,0 +1,150 @@
+{
+  "admin": {
+    "productDatabase": "BAZA PRODUKTÓW",
+    "newProduct": "NOWY PRODUKT",
+    "searchPlaceholder": "Szukaj po nazwie lub ID...",
+    "editProduct": "Edytuj produkt",
+    "editParams": "Edytuj parametry",
+    "updateSuccess": "Zaktualizowano pomyślnie!",
+    "updateError": "Błąd aktualizacji.",
+    "addProduct": "Dodaj nowy produkt",
+    "addProductBtn": "Dodaj produkt",
+    "deleteProduct": "Usuń produkt całkowicie",
+    "deleteError": "Błąd usuwania.",
+    "confirmDelete": "Potwierdź usunięcie produktu",
+    "saveError": "Wystąpił błąd podczas zapisywania produktu.",
+    "saveSuccess": "Zapisano pomyślnie."
+  },
+  "header": {
+    "welcome": "Witaj",
+    "adminPanel": "Panel Admina",
+    "login": "Zaloguj się",
+    "logout": "Wyloguj",
+    "cart": "Koszyk",
+    "top10": "Top 10",
+    "darkMode": "Tryb ciemny",
+    "lightMode": "Tryb jasny"
+  },
+  "auth": {
+    "loginRequired": "Musisz się zalogować, aby złożyć zamówienie."
+  },
+  "register": {
+    "title": "Rejestracja",
+    "username": "Login",
+    "email": "Email",
+    "password": "Hasło",
+    "captcha": "Ile to jest:",
+    "submit": "Zarejestruj się",
+    "haveAccount": "Mam już konto",
+    "success": "✅ Zarejestrowano!",
+    "error": "Błąd rejestracji.",
+    "captchaError": "❌ Błąd: Zły wynik!",
+    "connectionError": "Błąd połączenia."
+  },
+  "login": {
+    "title": "Logowanie",
+    "username": "Login",
+    "password": "Hasło",
+    "submit": "Zaloguj się",
+    "success": "Zalogowano pomyślnie!",
+    "error": "Nieprawidłowy login lub hasło",
+    "connectionError": "Błąd połączenia z serwerem.",
+    "noAccount": "Nie mam konta"
+  },
+  "captcha": {
+    "required": "Potwierdź, że nie jesteś robotem!"
+  },
+  "cart": {
+    "title": "Twój koszyk",
+    "empty": "Koszyk jest pusty",
+    "add": "Dodaj do koszyka",
+    "remove": "Usuń",
+    "total": "Łącznie",
+    "checkout": "Złóż zamówienie"
+  },
+  "order": {
+    "success": "Zamówienie zostało złożone!",
+    "notLoggedIn": "Musisz być zalogowany, aby złożyć zamówienie!",
+    "productNotFound": "Nie znaleziono produktu.",
+    "notEnoughStock": "Nie ma wystarczającej liczby produktu: {{productName}}"
+  },
+  "product": {
+    "name": "Nazwa",
+    "price": "Cena",
+    "weight": "Waga",
+    "description": "Opis",
+    "image": "Zdjęcie produktu",
+    "clickToAddImage": "Kliknij, aby dodać zdjęcie",
+    "stock": "Ilość na magazynie",
+    "origin": "Miejsce pochodzenia",
+    "package": "Opakowanie",
+    "roastLevel": "Palenie",
+    "acidity": "Kwasowość",
+    "caffeineLevel": "Kofeina",
+    "sweetness": "Słodycz",
+    "bought": "Kupiono",
+    "times": "razy",
+    "available": "DOSTĘPNY",
+    "unavailable": "NIEDOSTĘPNY",
+    "addToCart": "Dodaj do koszyka",
+    "outOfStock": "Brak na stanie"
+  },
+  "products": {
+    "loading": "Ładowanie...",
+    "search": "Szukaj kawy...",
+    "notFound": "Nie znaleziono kawy spełniającej te kryteria.",
+    "sort": {
+      "default": "Sortuj: Domyślnie",
+      "asc": "Cena: Rosnąco",
+      "desc": "Cena: Malejąco"
+    }
+  },
+
+  "filters": {
+    "title": "Filtry",
+    "all": "Wszystkie",
+    "roast": "Stopień palenia",
+    "roast1": "Jasne",
+    "roast2": "Średnie",
+    "roast3": "Ciemne",
+
+    "acidity": "Kwasowość",
+    "acidity1": "Niska",
+    "acidity2": "Zrównoważona",
+    "acidity3": "Wysoka",
+
+    "caffeine": "Kofeina",
+    "low": "Niska",
+    "medium": "Średnia",
+    "high": "Wysoka",
+
+    "sweetness": "Słodycz",
+    "dry": "Wytrawna",
+    "balanced": "Zrównoważona",
+    "sweet": "Słodka",
+
+    "weight": "Waga opakowania",
+    "reset": "Resetuj filtry"
+  },
+  "top10": {
+    "loading": "Ładowanie Top 10…"
+  },
+  "common": {
+    "actions": "Akcje",
+    "save": "Zapisz zmiany",
+    "confirm": "Zatwierdź",
+    "edit": "Edytuj",
+    "cancel": "Anuluj",
+    "delete": "Usuń",
+    "pcs": "szt.",
+    "outOfStock": "Wyprzedane",
+    "backToList": "Powrót do listy",
+    "loading": "Ładowanie...",
+    "loadingData": "Ładowanie danych...",
+    "connectionError": "Błąd połączenia.",
+    "pln": "zł"
+  },
+  "error": {
+    "generic": "Błąd: {{message}}"
+  }
+}

@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import "./css/Login.css";
+import { useTranslation } from "react-i18next";
 
 /**
  * @constant BASE
  * @brief Adres bazowy dla endpointów uwierzytelniania.
  */
+
 const BASE = "http://localhost:8080/api";
 
 /**
@@ -33,14 +35,18 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, is
     /** @brief Komunikaty błędów lub statusu dla użytkownika. */
     const [msg, setMsg] = useState('');
 
+    /** @brief Funkcja służąca do tłumaczenia kluczy tekstowych na aktualny język. */
+    const { t } = useTranslation();
+
     /**
      * @brief Wykonuje żądanie logowania do serwera.
      * Wymaga obecności tokena reCAPTCHA. Po sukcesie przekazuje dane użytkownika
      * (username, role) do wyższego komponentu.
      */
+    
     const handleLogin = async () => {
         if (!captchaToken) {
-            setMsg("Potwierdź, że nie jesteś robotem!");
+            setMsg(t("captcha.required"));
             return;
         }
 
@@ -59,17 +65,17 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, is
             const data = await res.json();
 
             if (res.ok) {
-                setMsg("✅ Zalogowano!");
+                setMsg(t("login.success"));
                 setTimeout(() => onLoginSuccess({
                     username: data.username,
                     isAdmin: data.isAdmin
                 }), 500);
             } else {
-                setMsg("⚠️ " + (data.message || "Błąd logowania."));
+                setMsg("⚠️ " + t(data.message || "login.error"));
                 setCaptchaToken(null);
             }
         } catch (err) {
-            setMsg("Błąd połączenia z serwerem.");
+            setMsg(t("common.connectionError"));
         }
     };
 
@@ -116,11 +122,12 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, is
  * Wyodrębniony w celu uniknięcia duplikacji kodu przy renderowaniu modalnym/zwykłym.
  */
 function LoginFormContent({ handleSubmit, setFormData, formData, onCancel, msg, onSwitchToRegister, setCaptchaToken }) {
+    const { t } = useTranslation();
     return (
         <form onSubmit={handleSubmit} className="auth-card">
-            <h3>Logowanie</h3>
+            <h3>{t("login.title")}</h3>
             <input
-                placeholder="Login"
+                placeholder={t("login.username")}
                 onChange={e => setFormData({...formData, username: e.target.value})}
                 value={formData.username}
                 required
@@ -128,13 +135,13 @@ function LoginFormContent({ handleSubmit, setFormData, formData, onCancel, msg, 
             <br/>
             <input
                 type="password"
-                placeholder="Hasło"
+                placeholder={t("login.password")}
                 onChange={e => setFormData({...formData, password: e.target.value})}
                 value={formData.password}
                 required
             />
             <br/>
-
+            
             <div className="captcha-container" style={{ margin: "15px 0", display: "flex", justifyContent: "center" }}>
                 <ReCAPTCHA
                     sitekey="6LeAQ1UsAAAAAGShPV_wIXF5Zg2V61XgtHl3qslz"
@@ -142,11 +149,11 @@ function LoginFormContent({ handleSubmit, setFormData, formData, onCancel, msg, 
                 />
             </div>
 
-            <button type="submit">Zaloguj się</button>
-            <button type="button" onClick={onCancel}>Anuluj</button>
+            <button type="submit">{t("login.submit")}</button>
+            <button type="button" onClick={onCancel}>{t("common.cancel")}</button>
             <p>{msg}</p>
             <button onClick={onSwitchToRegister} type="button" className="switch-register">
-                Nie mam konta
+                {t("login.noAccount")}
             </button>
         </form>
     );
