@@ -1,7 +1,9 @@
 import React from "react";
 import { getProductImage } from "./helpers.js";
+import { useTranslation } from "react-i18next";
 
 export default function Cart({ cart, onRemove, onCheckout }) {
+  const { t } = useTranslation();
   const grouped = cart.reduce((acc, item) => {
     if (!acc[item.id]) acc[item.id] = { ...item, quantity: 0 };
     acc[item.id].quantity += 1;
@@ -13,10 +15,10 @@ export default function Cart({ cart, onRemove, onCheckout }) {
 
   return (
     <div className="products-page-wrapper">
-      <h2 style={{ textAlign: "center", marginBottom: 20 }}>Twój koszyk</h2>
+      <h2 style={{ textAlign: "center", marginBottom: 20 }}> {t("cart.title")}</h2>
 
       {products.length === 0 ? (
-        <p style={{ textAlign: "center", fontSize: 18 }}>Koszyk jest pusty</p>
+        <p style={{ textAlign: "center", fontSize: 18 }}>{t("cart.empty")}</p>
       ) : (
         <ul className="products-ul">
           {products.map(item => (
@@ -37,9 +39,7 @@ export default function Cart({ cart, onRemove, onCheckout }) {
                   {["roastLevel", "acidity", "caffeineLevel", "sweetness"].map((attr, idx) => (
                     <div className="stat-row" key={idx}>
                       <span className="stat-label">
-                        {attr === "roastLevel" ? "Palenie" :
-                         attr === "acidity" ? "Kwasowość" :
-                         attr === "caffeineLevel" ? "Kofeina" : "Słodycz"}:
+                        {t(`product.${attr}`)}:
                       </span>
                       <div className="dots">
                         {[1, 2, 3].map(dot => (
@@ -60,7 +60,7 @@ export default function Cart({ cart, onRemove, onCheckout }) {
                     className="btnRemove"
                     onClick={() => onRemove(item.id)}
                   >
-                    Usuń
+                  {t("cart.remove")}
                 </button>
               </div>
             </li>
@@ -70,9 +70,9 @@ export default function Cart({ cart, onRemove, onCheckout }) {
 
       {products.length > 0 && (
         <div style={{ textAlign: "center", marginTop: 20 }}>
-          <h3 style={{ marginBottom: 15 }}>Łącznie: {total.toFixed(2)} zł</h3>
+          <h3 style={{ marginBottom: 15 }}>{t("cart.total")}: {total.toFixed(2)} zł</h3>
           <button className="btnCartCheckout" onClick={onCheckout}>
-            Złóż zamówienie
+            {t("cart.checkout")}
           </button>
         </div>
       )}

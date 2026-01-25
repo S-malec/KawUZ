@@ -9,6 +9,8 @@ import Login from './Login';
 import Register from './Register';
 import Top10Products from './Top10Products';
 import "./css/App.css"
+import i18n from "./i18n";
+import {useTranslation} from "react-i18next";
 
 const BASE = "http://localhost:8080/api";
 
@@ -26,6 +28,12 @@ export default function App() {
     const [cart, setCart] = useState([]);
 
     const [theme, setTheme] = useState('light');
+    const { t, i18n } = useTranslation();
+
+    const toggleLanguage = () => {
+        const nextLang = i18n.language === "pl" ? "en" : "pl";
+        i18n.changeLanguage(nextLang);
+    };
 
     useEffect(() => {
         const saved = localStorage.getItem('theme');
@@ -56,9 +64,9 @@ export default function App() {
     }, []);
 
     const handleCheckout = async () => {
-        if (cart.length === 0) return alert("Koszyk jest pusty");
+        if (cart.length === 0) return alert(t("cart.empty"));
         if (!user) { 
-            alert("Musisz się zalogować, aby złożyć zamówienie."); 
+            alert(t("auth.loginRequired"));
             setActiveModal('login'); 
             return; 
         }
@@ -89,8 +97,8 @@ export default function App() {
             } else {
                 alert(text); // wyświetlamy dokładny komunikat błędu
             }
-        } catch(err) { 
-            alert("Błąd: " + err.message); 
+        } catch(err) {
+            alert(t("error.generic", { message: err.message }));
         }
     };
 
@@ -116,25 +124,28 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     {user ? (
                         <>
-                            <span style={{color: 'var(--text)'}}>Witaj, <b>{user.username}</b>!</span>
+                            <span style={{color: 'var(--text)'}}>{t("header.welcome")}, <b>{user.username}</b>!</span>
                             {user.isAdmin && (
-                                <button onClick={() => navigate('/admin')}>Panel Admina</button>
+                                <button onClick={() => navigate('/admin')}>{t("header.adminPanel")}</button>
                             )}
-                            <button onClick={handleLogout}>Wyloguj</button>
+                            <button onClick={handleLogout}>{t("header.logout")}</button>
                         </>
                     ) : (
                         <button onClick={() => setActiveModal('login')}>
-                            Zaloguj się
+                            {t("header.login")}
                         </button>
                     )}
                     <button onClick={() => navigate('/cart')} style={{ marginLeft: 10 }}>
-                        Koszyk ({cart.length})
+                        {t("header.cart")} ({cart.length})
                     </button>
                     <button onClick={() => navigate('/top10')} style={{ fontWeight: 'bold' }}>
                         🏆 Top 10
                     </button>
                     <button onClick={toggleTheme} style={{padding: '10px 10px'}}>
-                        {theme === 'light' ? 'Tryb ciemny' : 'Tryb jasny'}
+                        {theme === 'light' ? t("header.darkMode") : t("header.lightMode")}
+                    </button>
+                    <button onClick={toggleLanguage}>
+                        {i18n.language === "pl" ? "EN" : "PL"}
                     </button>
                 </div>
             </div>

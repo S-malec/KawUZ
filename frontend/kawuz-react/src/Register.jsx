@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./css/Login.css";
-
+import { useTranslation } from "react-i18next";
 const BASE = "http://localhost:8080/api";
 
 export default function Register({ onSwitchToLogin, onCancel, isModal = false, onClose }) {
@@ -8,6 +8,7 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
     const [captcha, setCaptcha] = useState({ question: '', answer: 0 });
     const [userCaptcha, setUserCaptcha] = useState('');
     const [msg, setMsg] = useState('');
+    const { t } = useTranslation();
 
     useEffect(() => {
         const a = Math.floor(Math.random() * 10);
@@ -18,7 +19,7 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
     const handleRegister = async (e) => {
         e.preventDefault();
         if (parseInt(userCaptcha) !== captcha.answer) {
-            setMsg("❌ Błąd: Zły wynik!");
+            setMsg(t("register.captchaError"));
             return;
         }
 
@@ -31,13 +32,13 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
             const data = await res.json();
 
             if (res.ok) {
-                setMsg("✅ Zarejestrowano!");
+                setMsg(t("register.success"));
                 setTimeout(() => onSwitchToLogin(), 1500);
             } else {
-                setMsg("⚠️ " + (data.message || "Błąd rejestracji."));
+                setMsg("⚠️ " + (data.message || t("register.error")));
             }
         } catch (err) {
-            setMsg("Błąd połączenia.");
+            setMsg(t("register.connectionError"));
         }
     };
 
@@ -49,9 +50,9 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
 
     const formContent = (
         <form onSubmit={handleRegister} className="auth-card">
-            <h3>Rejestracja</h3>
+            <h3>{t("register.title")}</h3>
             <input
-                placeholder="Login"
+                placeholder={t("register.username")}
                 required
                 onChange={e => setFormData({...formData, username: e.target.value})}
                 value={formData.username}
@@ -65,14 +66,14 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
             />
             <input
                 type="password"
-                placeholder="Hasło"
+                placeholder={t("register.password")}
                 required
                 onChange={e => setFormData({...formData, password: e.target.value})}
                 value={formData.password}
             />
 
             <div className="captcha-container">
-                <label>Ile to jest: <b>{captcha.question}</b> ?</label>
+                <label>{t("register.captcha")} <b>{captcha.question}</b> ?</label>
                 <input
                     type="number"
                     style={{ width: '60px', marginLeft: '10px', marginBottom: 0 }}
@@ -82,13 +83,13 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
                 />
             </div>
 
-            <button type="submit">Zarejestruj się</button>
-            <button type="button" onClick={isModal ? onClose : onCancel}>Anuluj</button>
+            <button type="submit">{t("register.submit")}</button>
+            <button type="button" onClick={isModal ? onClose : onCancel}>{t("common.cancel")}</button>
 
             <p>{msg}</p>
 
             <button type="button" onClick={onSwitchToLogin} className="switch-login">
-                Mam już konto
+                {t("register.haveAccount")}
             </button>
         </form>
     );

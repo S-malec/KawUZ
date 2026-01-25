@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { getProductImage } from "./helpers";
 import "./css/ProductsList.css"; 
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const BASE = "http://localhost:8080/api";
-
 const CoffeeAttribute = ({ value, label }) => (
     <div className="stat-row">
         <span className="stat-label">{label}:</span>
@@ -20,6 +20,7 @@ export default function Top10Products({ onAddToCart }) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         fetch(`${BASE}/product/top10`, { credentials: "include" })
@@ -29,7 +30,7 @@ export default function Top10Products({ onAddToCart }) {
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <div>Ładowanie Top 10…</div>;
+    if (loading) return <div>t("top10.loading")</div>;
 
     return (
         <div className="products-container">
@@ -44,24 +45,24 @@ export default function Top10Products({ onAddToCart }) {
                             <h3 className="name">{p.name}</h3>
                             <p className="description">{p.description}</p>
                             <div className="coffee-stats">
-                                <CoffeeAttribute label="Palenie" value={p.roastLevel} />
-                                <CoffeeAttribute label="Kwasowość" value={p.acidity} />
-                                <CoffeeAttribute label="Kofeina" value={p.caffeineLevel} />
-                                <CoffeeAttribute label="Słodycz" value={p.sweetness} />
+                                <CoffeeAttribute label={t("product.roastLevel")} value={p.roastLevel} />
+                                <CoffeeAttribute label={t("product.acidity")} value={p.acidity} />
+                                <CoffeeAttribute label={t("product.caffeineLevel")} value={p.caffeineLevel} />
+                                <CoffeeAttribute label={t("product.sweetness")} value={p.sweetness} />
                             </div>
                         </div>
 
                         <div className="actions-section">
-                            <span className="weight-info">Opakowanie: <strong>{p.weight}</strong></span>
-                            <span className="price">{p.price} zł</span>
+                            <span className="weight-info">{t("product.package")}: <strong>{p.weight}</strong></span>
+                            <span className="price">{p.price} {t("common.pln")}</span>
                             <button
                                 onClick={() => onAddToCart(p)}
                                 className="btnCart"
                                 disabled={Number(p.stockQuantity) <= 0}
                             >
-                                Dodaj do koszyka
+                                {t("product.addToCart")}
                             </button>
-                            <p style={{ color: "#aaa", marginTop: 5 }}>Kupiono {p.sales} razy</p>
+                            <p style={{ color: "#aaa", marginTop: 5 }}>{t("product.bought")} {p.sales} {t("product.times")}</p>
                         </div>
                     </li>
                 ))}

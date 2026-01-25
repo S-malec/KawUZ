@@ -1,0 +1,142 @@
+{
+  "admin": {
+    "productDatabase": "PRODUCT DATABASE",
+    "newProduct": "NEW PRODUCT",
+    "searchPlaceholder": "Search by name or ID...",
+    "editProduct": "EDIT PRODUCT",
+    "editParams": "Edit parameters",
+    "updateSuccess": "Updated successfully!",
+    "updateError": "Update failed.",
+    "addProduct": "Add a new product",
+    "addProductBtn": "Add product",
+    "deleteProduct": "Delete product permanently",
+    "confirmDelete": "Confirm product deletion",
+    "deleteError": "Delete error.",
+    "saveSuccess": "Saved successfully.",
+    "saveError": "Save error."
+  },
+  "header": {
+    "welcome": "Welcome",
+    "adminPanel": "Admin Panel",
+    "login": "Login",
+    "logout": "Logout",
+    "cart": "Cart",
+    "top10": "Top 10",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode"
+  },
+  "auth": {
+    "loginRequired": "You must be logged in to place an order."
+  },
+  "register": {
+    "title": "Sign up",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "captcha": "What is:",
+    "submit": "Sign up",
+    "haveAccount": "I already have an account",
+    "success": "✅ Signed up successfully!",
+    "error": "Sign up error.",
+    "captchaError": "❌ Error: Wrong result!",
+    "connectionError": "Connection error."
+  },
+  "login": {
+    "title": "Login",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Sign in",
+    "success": "✅ Logged in!",
+    "error": "Login error.",
+    "connectionError": "Server connection error.",
+    "noAccount": "Create account"
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty",
+    "remove": "Remove",
+    "add": "Add to cart",
+    "total": "Total",
+    "checkout": "Checkout"
+  },
+
+  "product": {
+    "name": "Name",
+    "price": "Price",
+    "weight": "Weight",
+    "description": "Description",
+    "image": "Product image",
+    "clickToAddImage": "Click to add image",
+    "stock": "Quantity",
+    "origin": "Origin",
+    "package": "Package",
+    "roastLevel": "Roast",
+    "acidity": "Acidity",
+    "caffeineLevel": "Caffeine",
+    "sweetness": "Sweetness",
+    "bought": "Bought",
+    "times": "times",
+    "available": "AVAILABLE",
+    "unavailable": "UNAVAILABLE",
+    "addToCart": "Add to cart",
+    "outOfStock": "Out of stock"
+  },
+  "products": {
+    "loading": "Loading...",
+    "search": "Search coffee...",
+    "notFound": "No coffee matches your criteria.",
+    "sort": {
+      "default": "Sort: Default",
+      "asc": "Price: Low to High",
+      "desc": "Price: High to Low"
+    }
+  },
+
+  "filters": {
+    "title": "Filters",
+    "all": "All",
+    "roast": "Roast level",
+    "roast1": "Light",
+    "roast2": "Medium",
+    "roast3": "Dark",
+
+    "acidity": "Acidity",
+    "acidity1": "Low",
+    "acidity2": "Balanced",
+    "acidity3": "High",
+
+    "caffeine": "Caffeine",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+
+    "sweetness": "Sweetness",
+    "dry": "Dry",
+    "balanced": "Balanced",
+    "sweet": "Sweet",
+
+    "weight": "Package weight",
+    "reset": "Reset filters"
+  },
+  "top10": {
+    "loading": "Loading Top 10…"
+  },
+  "common": {
+    "actions": "Actions",
+    "save": "Save changes",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "pcs": "pcs",
+    "outOfStock": "Out of stock",
+    "backToList": "Back to list",
+    "loading": "Loading...",
+    "loadingData": "Loading data...",
+    "connectionError": "Connection error.",
+    "pln": "PLN"
+  },
+  "error": {
+    "generic": "Error: {{message}}"
+  }
+}

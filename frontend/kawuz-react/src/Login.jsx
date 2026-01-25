@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import "./css/Login.css";
-
+import { useTranslation } from "react-i18next";
 const BASE = "http://localhost:8080/api";
 
 export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, isModal = false, onClose }) {
     const [formData, setFormData] = useState({ username: '', password: '' });
     const [msg, setMsg] = useState('');
-
+    const { t } = useTranslation();
     const handleLogin = async () => {
         try {
             const res = await fetch(`${BASE}/auth/login`, {
@@ -18,13 +18,13 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, is
             const data = await res.json();
 
             if (res.ok) {
-                setMsg("✅ Zalogowano!");
+                setMsg(t("login.success"));
                 setTimeout(() => onLoginSuccess({
                     username: data.username,
                     isAdmin: data.isAdmin
                 }), 500);
             } else {
-                setMsg("⚠️ " + (data.message || "Błąd logowania."));
+                setMsg("⚠️ " + (data.message || t("login.error")));
             }
         } catch (err) {
             setMsg("Błąd połączenia z serwerem.");
@@ -73,27 +73,28 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, is
 
 // Komponent wewnętrzny dla czystości kodu, zawierający sam formularz (BEZ ZMIAN)
 function LoginFormContent({ handleSubmit, setFormData, formData, onCancel, msg, onSwitchToRegister }) {
+    const { t } = useTranslation();
     return (
         <form onSubmit={handleSubmit} className="auth-card">
-            <h3>Logowanie</h3>
+            <h3>{t("login.title")}</h3>
             <input
-                placeholder="Login"
+                placeholder={t("login.username")}
                 onChange={e => setFormData({...formData, username: e.target.value})}
                 value={formData.username}
             />
             <br/>
             <input
                 type="password"
-                placeholder="Hasło"
+                placeholder={t("login.password")}
                 onChange={e => setFormData({...formData, password: e.target.value})}
                 value={formData.password}
             />
             <br/>
-            <button type="submit">Zaloguj się</button>
-            <button type="button" onClick={onCancel}>Anuluj</button>
+            <button type="submit">{t("login.submit")}</button>
+            <button type="button" onClick={onCancel}>{t("common.cancel")}</button>
             <p>{msg}</p>
             <button onClick={onSwitchToRegister} type="button" className="switch-register">
-                Nie mam konta
+                {t("login.noAccount")}
             </button>
         </form>
     );

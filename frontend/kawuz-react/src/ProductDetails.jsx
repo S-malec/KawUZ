@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getProductImage } from "./helpers.js";
 import "./css/ProductDetails.css";
+import { useTranslation } from "react-i18next";
 
 const BASE = "http://localhost:8080/api";
 
@@ -21,6 +22,7 @@ const CoffeeAttribute = ({ value, label }) => {
 
 // --- Komponent Formularza Edycji (zaktualizowany o nowe pola) ---
 function UpdateProductForm({ product, onUpdate }) {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState({
         name: product?.name ?? "",
         price: product?.price ?? "",
@@ -57,10 +59,10 @@ function UpdateProductForm({ product, onUpdate }) {
             });
 
             if (res.ok) {
-                setMsg("Zaktualizowano pomyślnie!");
+                setMsg(t("admin.updateSuccess"));
                 onUpdate?.();
             } else {
-                setMsg("Błąd aktualizacji.");
+                setMsg(t("admin.updateError"));
             }
         } catch (err) {
             setMsg(err.message);
@@ -69,20 +71,20 @@ function UpdateProductForm({ product, onUpdate }) {
 
     return (
         <form onSubmit={submitAsJson} className="update-product-form">
-            <h4>Edytuj parametry</h4>
+            <h4>{t("admin.editParams")}</h4>
             <div className="form-grid">
-                <label>Nazwa: <input name="name" value={formData.name} onChange={handleChange} /></label>
-                <label>Cena: <input name="price" value={formData.price} onChange={handleChange} /></label>
-                <label>Waga:
+                <label>{t("product.name")}: <input name="name" value={formData.name} onChange={handleChange} /></label>
+                <label>{t("product.price")}: <input name="price" value={formData.price} onChange={handleChange} /></label>
+                <label>{t("product.weight")}:
                     <select name="weight" value={formData.weight} onChange={handleChange}>
                         <option value="500g">500g</option>
                         <option value="1000g">1000g</option>
                     </select>
                 </label>
             </div>
-            <label>Opis: <textarea name="description" value={formData.description} onChange={handleChange} /></label>
+            <label>{t("product.description")}: <textarea name="description" value={formData.description} onChange={handleChange} /></label>
             <div className="status-message">{msg}</div>
-            <button type="submit" className="btn-save">Zapisz zmiany</button>
+            <button type="submit" className="btn-save">{t("common.save")}</button>
         </form>
     );
 }
@@ -92,6 +94,7 @@ function ProductDetails({ id, onBack, refreshList, isEditable = false, onAddToCa
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const { t } = useTranslation();
 
     const fetchProduct = () => {
         if (!id) return;
@@ -105,12 +108,12 @@ function ProductDetails({ id, onBack, refreshList, isEditable = false, onAddToCa
 
     useEffect(fetchProduct, [id]);
 
-    if (loading) return <div className="status-message">Ładowanie...</div>;
+    if (loading) return <div className="status-message">{t("common.loading")}</div>;
     if (!product) return null;
 
     return (
         <div className="product-details-container">
-            <button onClick={onBack} className="btn-back">← Powrót do listy</button>
+            <button onClick={onBack} className="btn-back">← {t("common.backToList")}</button>
 
             <div className="product-card-main">
                 <div className="product-image-section">
@@ -123,17 +126,17 @@ function ProductDetails({ id, onBack, refreshList, isEditable = false, onAddToCa
                     <p className="details-description">{product.description}</p>
 
                     <div className="details-stats-grid">
-                        <CoffeeAttribute label="Palenie" value={product.roastLevel} />
-                        <CoffeeAttribute label="Kwasowość" value={product.acidity} />
-                        <CoffeeAttribute label="Kofeina" value={product.caffeineLevel} />
-                        <CoffeeAttribute label="Słodycz" value={product.sweetness} />
+                        <CoffeeAttribute label={t("product.roastLevel")} value={product.roastLevel} />
+                        <CoffeeAttribute label={t("product.acidity")} value={product.acidity} />
+                        <CoffeeAttribute label={t("product.caffeineLevel")} value={product.caffeineLevel} />
+                        <CoffeeAttribute label={t("product.sweetness")} value={product.sweetness} />
                     </div>
 
                     <div className="details-price-row">
                         <span className="details-price">{product.price} zł</span>
                         <div className="details-actions">
                             <button onClick={() => onAddToCart(product)} className="btnCart">
-                                Dodaj do koszyka
+                                {t("cart.add")}
                             </button>
                             <button onClick={() => window.location.href=`${BASE}/product/${product.id}/pdf`} className="btn-pdf">
                                 PDF
@@ -145,7 +148,7 @@ function ProductDetails({ id, onBack, refreshList, isEditable = false, onAddToCa
 
             {product.map && (
                 <div className="details-map-section">
-                    <h3>Miejsce pochodzenia</h3>
+                    <h3>{t("product.origin")}</h3>
                     <iframe
                         src={`https://maps.google.com/maps?q=${product.map}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
                         width="100%"
@@ -160,7 +163,7 @@ function ProductDetails({ id, onBack, refreshList, isEditable = false, onAddToCa
             {isEditable && (
                 <div className="admin-controls">
                     <UpdateProductForm product={product} onUpdate={fetchProduct} />
-                    <button onClick={() => {/* funkcja delete */}} className="btn-danger-outline">Usuń produkt całkowicie</button>
+                    <button onClick={() => {/* funkcja delete */}} className="btn-danger-outline">{t("admin.deleteProduct")}</button>
                 </div>
             )}
         </div>
