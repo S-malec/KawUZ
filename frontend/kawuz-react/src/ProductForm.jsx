@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+/** * @constant API_URL
+ * @brief Adres bazowy API dla operacji na produktach.
+ */
 const API_URL = 'http://localhost:8080/api/product';
 
+/**
+ * @component ProductForm
+ * @brief Komponent formularza służący do dodawania nowych produktów lub edycji istniejących.
+ * * Formularz obsługuje przesyłanie danych tekstowych oraz plików graficznych przy użyciu
+ * obiektu FormData, co pozwala na integrację z backendem obsługującym 'multipart/form-data'.
+ * * @param {Object} props
+ * @param {Object} [props.initialProduct={}] Obiekt z danymi produktu w przypadku edycji.
+ * @param {Function} [props.onProductSaved] Callback wywoływany po pomyślnym zapisaniu danych.
+ */
 function ProductForm({ initialProduct = {}, onProductSaved }) {
+    /** @brief Stan przechowujący dane tekstowe i liczbowe produktu. */
     const [productData, setProductData] = useState({
         name: initialProduct.name || '',
         description: initialProduct.description || '',
@@ -11,10 +24,16 @@ function ProductForm({ initialProduct = {}, onProductSaved }) {
         stockQuantity: initialProduct.stockQuantity || 0,
     });
 
+    /** @brief Stan przechowujący wybrany plik binarny (zdjęcie). */
     const [selectedFile, setSelectedFile] = useState(null);
 
+    /** @brief Flaga logiczna określająca, czy formularz działa w trybie edycji (na podstawie obecności ID). */
     const isEditMode = initialProduct.id != null;
 
+    /**
+     * @brief Uniwersalny hander dla pól tekstowych, liczbowych i checkboxów.
+     * @param {React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>} e Zdarzenie zmiany pola.
+     */
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setProductData(prevData => ({
@@ -23,14 +42,24 @@ function ProductForm({ initialProduct = {}, onProductSaved }) {
         }));
     };
 
+    /**
+     * @brief Obsługuje wybór pliku z dysku użytkownika.
+     * @param {React.ChangeEvent<HTMLInputElement>} e Zdarzenie zmiany inputu typu file.
+     */
     const handleFileChange = (e) => {
         setSelectedFile(e.target.files[0]);
     };
 
+    /**
+     * @brief Przetwarza dane i wysyła żądanie do API.
+     * * Pakuje dane do obiektu FormData, aby umożliwić przesyłanie pliku wraz z polami tekstowymi.
+     * Wykorzystuje axios.post dla nowych produktów lub axios.put dla aktualizacji.
+     * * @param {React.FormEvent} e Zdarzenie wysłania formularza.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // TWORZENIE FORM DATA
+        // TWORZENIE FORM DATA - niezbędne do przesyłania plików
         const formData = new FormData();
 
         // Dodajemy plik (jeśli został wybrany)
@@ -38,6 +67,7 @@ function ProductForm({ initialProduct = {}, onProductSaved }) {
             formData.append('image', selectedFile);
         }
 
+        // Dodawanie pozostałych pól produktu
         formData.append('name', productData.name);
         formData.append('description', productData.description);
         formData.append('price', productData.price);
@@ -56,8 +86,11 @@ function ProductForm({ initialProduct = {}, onProductSaved }) {
             }
 
             console.log('Sukces:', response.data);
+
+            // Resetowanie formularza po sukcesie
             setProductData({ name: '', description: '', price: 0, stockQuantity: 0 });
-            setSelectedFile(null); // Reset pliku
+            setSelectedFile(null);
+
             if (onProductSaved) onProductSaved();
 
         } catch (error) {

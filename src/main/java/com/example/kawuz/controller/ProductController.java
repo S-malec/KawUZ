@@ -17,26 +17,43 @@ import org.springframework.http.MediaType;
 
 import java.util.List;
 
+/**
+ * @class ProductController
+ * @brief Kontroler zarządzający asortymentem produktów (kaw).
+ * * Udostępnia API do zarządzania produktami, wyszukiwania, przesyłania zdjęć
+ * oraz generowania ofert handlowych w formacie PDF.
+ */
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api")
-
-
-
 public class ProductController {
     ProductService productService;
 
+    /** @brief Ścieżka do katalogu, w którym przechowywane są zdjęcia produktów. */
     private final String UPLOAD_DIR = "frontend/kawuz-react/public/images/";
 
+    /**
+     * @brief Konstruktor wstrzykujący usługę produktów.
+     * @param productService Serwis produktów.
+     */
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
+    /**
+     * @brief Pobiera listę wszystkich dostępnych produktów.
+     * @return ResponseEntity zawierające listę produktów.
+     */
     @GetMapping("/products")
     public ResponseEntity<List<Product>> getAllProducts(){
         return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
     }
 
+    /**
+     * @brief Pobiera szczegółowe dane konkretnego produktu na podstawie ID.
+     * @param id Unikalny identyfikator produktu.
+     * @return ResponseEntity z obiektem Product lub statusem 404.
+     */
     @GetMapping("/product/{id}")
     public ResponseEntity<Product> getProduct(@PathVariable int id){
 
@@ -48,6 +65,12 @@ public class ProductController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * @brief Aktualizuje dane podstawowe istniejącego produktu.
+     * @param id ID produktu do aktualizacji.
+     * @param product Obiekt z nowymi danymi.
+     * @return Status operacji.
+     */
     @PutMapping("/product/{id}")
     public ResponseEntity<String> updateProduct(@PathVariable int id,
                                                 @RequestBody Product product){
@@ -62,6 +85,11 @@ public class ProductController {
 
     }
 
+    /**
+     * @brief Usuwa produkt z systemu.
+     * @param id ID produktu do usunięcia.
+     * @return Status usunięcia lub błąd 404.
+     */
     @DeleteMapping("/product/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable int id){
         Product product = productService.getProductById(id);
@@ -74,24 +102,44 @@ public class ProductController {
         }
     }
 
+    /**
+     * @brief Wyszukuje produkty na podstawie słowa kluczowego.
+     * @param keyword Fraza do wyszukania w nazwie lub opisie.
+     * @return Lista pasujących produktów.
+     */
     @GetMapping("/product/search")
     public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword) {
         List<Product> results = productService.searchProducts(keyword);
         return ResponseEntity.ok(results);
     }
 
+    /**
+     * @brief Tworzy nowy produkt bez zdjęcia (format JSON).
+     * @param product Dane nowego produktu.
+     * @return Utworzony obiekt produktu.
+     */
     @PostMapping("/product")
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         Product savedProduct = productService.addProduct(product);
         return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
     }
 
+    /**
+     * @brief Pobiera 10 najlepiej sprzedających się produktów.
+     * @return Lista top produktów.
+     */
     @GetMapping("/product/top10")
     public ResponseEntity<List<Product>> getTop10Products() {
         List<Product> topProducts = productService.getTop10Products();
         return new ResponseEntity<>(topProducts, HttpStatus.OK);
     }
 
+    /**
+     * @brief Tworzy nowy produkt wraz z załączonym zdjęciem.
+     * @param product Dane produktu (multipart).
+     * @param image Plik graficzny produktu.
+     * @return Utworzony obiekt produktu.
+     */
     @PostMapping(value = "/product", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Product> createProduct(
             @RequestPart("product") Product product,
@@ -106,6 +154,13 @@ public class ProductController {
         return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
     }
 
+    /**
+     * @brief Aktualizuje produkt wraz z opcjonalną zmianą zdjęcia.
+     * @param id ID produktu.
+     * @param product Nowe dane produktu.
+     * @param image Nowy plik graficzny (opcjonalnie).
+     * @return Status aktualizacji.
+     */
     @PutMapping(value = "/product/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<String> updateProduct(
             @PathVariable int id,
@@ -124,6 +179,12 @@ public class ProductController {
         }
     }
 
+    /**
+     * @brief Generuje dokument PDF z ofertą produktu i wysyła go do strumienia odpowiedzi.
+     * @param id ID produktu dla którego generowana jest oferta.
+     * @param response Obiekt odpowiedzi HTTP.
+     * @throws IOException Błąd zapisu do strumienia lub odczytu czcionek.
+     */
     @GetMapping("/product/{id}/pdf")
     public void generatePdf(@PathVariable int id, HttpServletResponse response) throws IOException {
         Product product = productService.getProductById(id);
@@ -170,7 +231,6 @@ public class ProductController {
             img.scaleToFit(180, 250);
             imageCell.addElement(img);
         } catch (Exception e) {
-            System.out.println("Nie znaleziono zdjęcia dla PDF: " + e.getMessage());
             Paragraph noPhoto = new Paragraph("\n[Brak zdjęcia poglądowego]\n", fontNormal);
             noPhoto.setAlignment(Element.ALIGN_CENTER);
             imageCell.addElement(noPhoto);
@@ -208,13 +268,15 @@ public class ProductController {
         document.close();
     }
 
-    // --- Metoda pomocnicza do rysowania kropek (●●●○○) ---
+    /**
+     * @brief Generuje graficzną reprezentację poziomu cechy (kropki).
+     * @param level Poziom cechy.
+     * @return String ze znakami graficznymi.
+     */
     private String makeDots(int level) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 3; i++) {
             if (i < level) {
-                // Używam "O" jako pełnej kropki i "-" jako pustej, bo standardowe kropki unicode
-                // mogą czasem znikać w starych wersjach PDF, ale spróbujmy kropek:
                 sb.append("●");
             } else {
                 sb.append("○");
@@ -223,6 +285,11 @@ public class ProductController {
         return sb.toString();
     }
 
+    /**
+     * @brief Zapisuje przesłane zdjęcie produktu w katalogu publicznym frontendu.
+     * @param file Plik graficzny.
+     * @param productName Nazwa produktu służąca jako nazwa pliku.
+     */
     private void saveImage(MultipartFile file, String productName) {
         try {
             Path uploadPath = Paths.get(UPLOAD_DIR);
@@ -230,17 +297,13 @@ public class ProductController {
                 Files.createDirectories(uploadPath);
             }
 
-            // Zapisujemy jako nazwa_produktu.png
             String fileName = productName + ".png";
             Path filePath = uploadPath.resolve(fileName);
 
-            // Nadpisujemy jeśli już istnieje
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            System.out.println("Zapisano zdjęcie: " + filePath.toAbsolutePath());
         } catch (IOException e) {
             System.err.println("Błąd zapisu pliku: " + e.getMessage());
         }
     }
 }
-

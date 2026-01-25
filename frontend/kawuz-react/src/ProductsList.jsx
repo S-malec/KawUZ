@@ -3,8 +3,14 @@ import { getProductImage } from "./helpers.js";
 import { useNavigate } from "react-router-dom";
 import "./css/ProductsList.css";
 
+/** * @constant BASE
+ * @brief Adres bazowy API dla zasobów produktów.
+ */
 const BASE = "http://localhost:8080/api";
 
+/** * @constant initialFilters
+ * @brief Początkowy stan filtrów dla atrybutów kawy.
+ */
 const initialFilters = {
     roastLevel: [],
     caffeineLevel: [],
@@ -13,15 +19,30 @@ const initialFilters = {
     weight: []
 };
 
+/**
+ * @component ProductsList
+ * @brief Główny komponent wyświetlający listę produktów z funkcjonalnością filtrowania i sortowania.
+ * * @param {Object} props
+ * @param {Function} props.onSelect Funkcja wywoływana przy wyborze produktu (nawigacja).
+ * @param {Function} props.onAddToCart Funkcja dodająca produkt do globalnego koszyka.
+ */
 function ProductsList({ onSelect, onAddToCart }) {
+    /** @brief Lista wszystkich produktów pobranych z serwera. */
     const [products, setProducts] = useState([]);
+    /** @brief Fraza wyszukiwania tekstowego. */
     const [search, setSearch] = useState("");
-    const [sortOrder, setSortOrder] = useState(""); // Nowy stan dla sortowania
+    /** @brief Kierunek sortowania cen ('asc', 'desc' lub pusty). */
+    const [sortOrder, setSortOrder] = useState("");
+    /** @brief Flaga wskazująca na trwające pobieranie danych. */
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    /** @brief Stan przechowujący aktywne kryteria filtrowania. */
     const [filters, setFilters] = useState(initialFilters);
 
+    /**
+     * @brief Pobiera listę produktów z backendu przy montowaniu komponentu.
+     */
     useEffect(() => {
         fetch(`${BASE}/products`, { credentials: 'include' })
             .then(res => res.json())
@@ -30,6 +51,11 @@ function ProductsList({ onSelect, onAddToCart }) {
             .finally(() => setLoading(false));
     }, []);
 
+    /**
+     * @brief Obsługuje zmianę wartości w filtrach bocznych.
+     * @param {string} category Nazwa kategorii filtra (np. 'roastLevel').
+     * @param {string} value Wybrana wartość z selecta.
+     */
     const handleFilterChange = (category, value) => {
         setFilters(prev => ({
             ...prev,
@@ -37,12 +63,16 @@ function ProductsList({ onSelect, onAddToCart }) {
         }));
     };
 
+    /**
+     * @brief Przywraca filtry i sortowanie do stanu domyślnego.
+     */
     const resetFilters = () => {
         setFilters(initialFilters);
-        setSortOrder(""); // Resetowanie sortowania przy resetowaniu filtrów
+        setSortOrder("");
     };
 
-    // 1. Najpierw filtrujemy
+    /** * @brief Produkty przefiltrowane na podstawie wyszukiwania i wybranych cech.
+     */
     const filteredProducts = products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
         const matchesRoast = filters.roastLevel.length === 0 || filters.roastLevel.includes(p.roastLevel);
@@ -54,16 +84,24 @@ function ProductsList({ onSelect, onAddToCart }) {
         return matchesSearch && matchesRoast && matchesCaffeine && matchesSweetness && matchesAcidity && matchesWeight;
     });
 
-    // 2. Potem sortujemy przefiltrowaną listę
+    /** * @brief Ostateczna lista produktów po zastosowaniu filtrów oraz sortowania cenowego.
+     */
     const sortedProducts = [...filteredProducts].sort((a, b) => {
         if (sortOrder === "asc") {
             return a.price - b.price;
         } else if (sortOrder === "desc") {
             return b.price - a.price;
         }
-        return 0; // Brak sortowania
+        return 0;
     });
 
+    /**
+     * @component CoffeeAttribute
+     * @brief Mały komponent wewnętrzny do renderowania kropek (statystyk) kawy.
+     * @param {Object} props
+     * @param {number} props.value Wartość cechy (1-3).
+     * @param {string} props.label Etykieta wyświetlana obok kropek.
+     */
     const CoffeeAttribute = ({ value, label }) => (
         <div className="stat-row">
             <span className="stat-label">{label}:</span>
@@ -79,9 +117,7 @@ function ProductsList({ onSelect, onAddToCart }) {
 
     return (
         <div className="products-page-wrapper">
-            {/* Wyszukiwarka i Sortowanie obok siebie */}
             <div className="search-wrapper">
-                {/* Pusty element po lewej, żeby input był idealnie na środku */}
                 <div className="search-side-space"></div>
 
                 <input
@@ -106,7 +142,6 @@ function ProductsList({ onSelect, onAddToCart }) {
             </div>
 
             <div className="main-layout">
-                {/* SIDEBAR Z FILTRAMI */}
                 <aside className="sidebar">
                     <h3>Filtry</h3>
                     <div className="filter-section">
@@ -163,7 +198,6 @@ function ProductsList({ onSelect, onAddToCart }) {
                     </button>
                 </aside>
 
-                {/* LISTA PRODUKTÓW */}
                 <div className="products-container">
                     <ul className="products-ul">
                         {sortedProducts.map(p => (

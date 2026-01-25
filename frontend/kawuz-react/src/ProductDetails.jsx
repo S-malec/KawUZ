@@ -3,9 +3,18 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getProductImage } from "./helpers.js";
 import "./css/ProductDetails.css";
 
+/** @constant BASE
+ * @brief Adres URL punktu końcowego API.
+ */
 const BASE = "http://localhost:8080/api";
 
-// --- Komponent Kropek (ten sam co na liście) ---
+/**
+ * @component CoffeeAttribute
+ * @brief Prezentuje wizualną skalę (kropki) dla konkretnej cechy kawy.
+ * @param {Object} props
+ * @param {number} props.value Wartość cechy w skali 1-3.
+ * @param {string} props.label Nazwa cechy (np. "Kofeina").
+ */
 const CoffeeAttribute = ({ value, label }) => {
     return (
         <div className="stat-row">
@@ -19,7 +28,15 @@ const CoffeeAttribute = ({ value, label }) => {
     );
 };
 
-// --- Komponent Formularza Edycji (zaktualizowany o nowe pola) ---
+/**
+ * @component UpdateProductForm
+ * @brief Formularz edycji parametrów produktu dostępny dla administratora.
+ * * Wykorzystuje format JSON do wysyłania aktualizacji i dba o zachowanie
+ * stałych danych produktu (ID, sales) przy jednoczesnej modyfikacji cech opisowych.
+ * @param {Object} props
+ * @param {Object} props.product Obiekt produktu do edycji.
+ * @param {Function} props.onUpdate Callback wywoływany po pomyślnym zapisie zmian.
+ */
 function UpdateProductForm({ product, onUpdate }) {
     const [formData, setFormData] = useState({
         name: product?.name ?? "",
@@ -38,15 +55,17 @@ function UpdateProductForm({ product, onUpdate }) {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    /**
+     * @brief Wysyła zaktualizowane dane produktu do backendu metodą PUT.
+     * @param {Event} e Obiekt zdarzenia formularza.
+     */
     const submitAsJson = async (e) => {
         e.preventDefault();
         try {
-            // Tworzymy pełny obiekt: bierzemy wszystko z oryginalnego produktu
-            // i nadpisujemy tym, co użytkownik zmienił w formularzu
             const updatedProduct = {
-                ...product,      // <--- To zachowa adresy map, sales, imageUrl itp.
-                ...formData,     // <--- To nadpisze nazwę, cenę itp. nowymi danymi
-                id: product.id   // Upewniamy się, że ID jest poprawne
+                ...product,
+                ...formData,
+                id: product.id
             };
 
             const res = await fetch(`${BASE}/product/${product.id}`, {
@@ -87,12 +106,24 @@ function UpdateProductForm({ product, onUpdate }) {
     );
 }
 
-// --- Główny Komponent ---
+/**
+ * @component ProductDetails
+ * @brief Prezentuje szczegółowe informacje o wybranej kawie.
+ * * Zawiera sekcje: galeria, atrybuty smakowe, mapę pochodzenia oraz
+ * opcjonalny panel administratora do edycji produktu.
+ * @param {Object} props
+ * @param {string} props.id Numeryczny identyfikator produktu.
+ * @param {Function} props.onBack Powrót do listy.
+ * @param {boolean} props.isEditable Czy użytkownik ma uprawnienia do edycji.
+ */
 function ProductDetails({ id, onBack, refreshList, isEditable = false, onAddToCart }) {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
+    /**
+     * @brief Pobiera dane produktu z serwera na podstawie ID.
+     */
     const fetchProduct = () => {
         if (!id) return;
         setLoading(true);
@@ -167,6 +198,11 @@ function ProductDetails({ id, onBack, refreshList, isEditable = false, onAddToCa
     );
 }
 
+/**
+ * @component ProductDetailsWrapper
+ * @brief Opakowanie komponentu szczegółów obsługujące routing.
+ * * Odpowiada za sparsowanie ID ze ścieżki URL (np. "1-kawa-brazylia" -> "1").
+ */
 export default function ProductDetailsWrapper({ user, onAddToCart, refreshList }) {
     const { id } = useParams();
     const navigate = useNavigate();
