@@ -10,23 +10,48 @@ import Register from './Register';
 import Top10Products from './Top10Products';
 import "./css/App.css"
 
+/**
+ * @constant BASE
+ * @brief Bazowy adres URL dla endpointów API backendu.
+ */
 const BASE = "http://localhost:8080/api";
 
+/**
+ * @component App
+ * @brief Główny komponent aplikacji KawUZ.
+ * * Zarządza globalnym stanem aplikacji, w tym:
+ * - Uwierzytelnianiem użytkownika i sesją.
+ * - Stanem koszyka zakupowego.
+ * - Motywem graficznym (light/dark mode).
+ * - Routingiem i nawigacją.
+ * - Obsługą modali (Logowanie/Rejestracja) przez parametry URL.
+ */
 export default function App() {
+    /** @brief Hook nawigacyjny react-router-dom. */
     const navigate = useNavigate();
+    /** @brief Stan przechowujący dane zalogowanego użytkownika. */
     const [user, setUser] = useState(null);
+    /** @brief Flaga określająca, czy trwa sprawdzanie statusu logowania. */
     const [isLoadingUser, setIsLoadingUser] = useState(true);
+    /** @brief Hook do obsługi parametrów wyszukiwania w URL (używany do modali). */
     const [searchParams, setSearchParams] = useSearchParams();
+    /** @brief Pobiera aktualnie aktywny modal z parametru 'modal' w URL. */
     const activeModal = searchParams.get("modal");
 
+    /** @brief Klucz odświeżania komponentów zależnych od bazy danych. */
     const [refreshKey, setRefreshKey] = useState(0);
     const [mode, setMode] = useState('list');
     const [isEditing, setIsEditing] = useState(false);
 
+    /** @brief Stan przechowujący listę produktów w koszyku. */
     const [cart, setCart] = useState([]);
 
+    /** @brief Stan motywu kolorystycznego. */
     const [theme, setTheme] = useState('light');
 
+    /**
+     * @brief Efekt inicjalizujący motyw na podstawie danych z localStorage.
+     */
     useEffect(() => {
         const saved = localStorage.getItem('theme');
         if(saved) {
@@ -35,6 +60,10 @@ export default function App() {
         }
     }, []);
 
+    /**
+     * @brief Przełącza motyw między jasnym a ciemnym.
+     * Zapisuje preferencję w localStorage i aktualizuje klasy dokumentu.
+     */
     const toggleTheme = () => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
         setTheme(newTheme);
@@ -42,6 +71,10 @@ export default function App() {
         localStorage.setItem('theme', newTheme);
     }
 
+    /**
+     * @brief Efekt sprawdzający status sesji użytkownika przy starcie aplikacji.
+     * Komunikuje się z endpointem /auth/me.
+     */
     useEffect(() => {
         const checkLoginStatus = async () => {
             try {
@@ -55,12 +88,18 @@ export default function App() {
         checkLoginStatus();
     }, []);
 
+    /**
+     * @brief Obsługuje proces finalizacji zamówienia.
+     * 1. Grupuje produkty z koszyka według ID.
+     * 2. Wysyła żądanie POST do backendu.
+     * 3. Czyści koszyk po sukcesie.
+     */
     const handleCheckout = async () => {
         if (cart.length === 0) return alert("Koszyk jest pusty");
-        if (!user) { 
-            alert("Musisz się zalogować, aby złożyć zamówienie."); 
-            setActiveModal('login'); 
-            return; 
+        if (!user) {
+            alert("Musisz się zalogować, aby złożyć zamówienie.");
+            setActiveModal('login');
+            return;
         }
 
         try {
@@ -79,31 +118,38 @@ export default function App() {
                 body: JSON.stringify(orderItems),
             });
 
-            const text = await res.text(); // <-- odczytujemy body odpowiedzi
+            const text = await res.text();
 
-            if(res.ok) { 
-                alert(text); // wyświetlamy dokładny komunikat z backendu
+            if(res.ok) {
+                alert(text);
                 setCart([]);
                 setRefreshKey(k => k+1);
                 navigate('cart');
             } else {
-                alert(text); // wyświetlamy dokładny komunikat błędu
+                alert(text);
             }
-        } catch(err) { 
-            alert("Błąd: " + err.message); 
+        } catch(err) {
+            alert("Błąd: " + err.message);
         }
     };
 
 
+    /**
+     * @brief Wylogowuje użytkownika, czyści sesję na serwerze i resetuje stan lokalny.
+     */
     const handleLogout = async () => { await fetch(`${BASE}/auth/logout`, { method: "POST", credentials: "include" }); setUser(null); setCart([]); setMode('list'); setActiveTab('products'); };
 
     if (isLoadingUser) return <div style={{color: 'var(--text)'}}>Ładowanie...</div>;
 
+    /**
+     * @brief Zarządza widocznością modali poprzez aktualizację parametrów URL.
+     * @param {string|null} type Typ modalu ('login', 'register') lub null aby zamknąć.
+     */
     const setActiveModal = (type) => {
         if (type) {
-            setSearchParams({ modal: type }); // Ustawia ?modal=login
+            setSearchParams({ modal: type });
         } else {
-            setSearchParams({}); // Usuwa parametry, co zamknie modal
+            setSearchParams({});
         }
     };
 
@@ -150,7 +196,6 @@ export default function App() {
                             />
                         </div>
                     ) : (
-                        // Jeśli nie jest adminem, przekieruj na stronę główną
                         <Navigate to="/" replace />
                     )
                 } />
@@ -169,7 +214,6 @@ export default function App() {
                 <Route path="/cart" element={<Cart
                     cart={cart}
                     onRemove={(id) => setCart(prev => {
-                        // usuwa tylko pierwsze wystąpienie produktu o danym id
                         const index = prev.findIndex(p => p.id === id);
                         if(index === -1) return prev;
                         const newCart = [...prev];

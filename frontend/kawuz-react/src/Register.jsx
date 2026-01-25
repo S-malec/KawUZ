@@ -2,17 +2,41 @@ import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha"; //
 import "./css/Login.css";
 
+/** * @constant BASE
+ * @brief Adres bazowy dla endpointów uwierzytelniania i rejestracji.
+ */
 const BASE = "http://localhost:8080/api";
 
+/**
+ * @component Register
+ * @brief Komponent obsługujący formularz rejestracji nowego użytkownika.
+ * * Funkcjonalności:
+ * - Zbieranie danych (login, email, hasło).
+ * - Integracja z Google reCAPTCHA w celu weryfikacji botów.
+ * - Wyświetlanie komunikatu o sukcesie/błędzie.
+ * - Obsługa renderowania w modalu z zamykaniem przez overlay.
+ * * @param {Object} props
+ * @param {Function} props.onSwitchToLogin Funkcja przełączająca na widok logowania.
+ * @param {Function} props.onCancel Funkcja anulująca proces rejestracji.
+ * @param {boolean} props.isModal Flaga określająca tryb wyświetlania (pełny ekran vs modal).
+ * @param {Function} props.onClose Funkcja zamykająca modal.
+ */
 export default function Register({ onSwitchToLogin, onCancel, isModal = false, onClose }) {
-    // Dane formularza
+    /** @brief Stan przechowujący dane wejściowe formularza. */
     const [formData, setFormData] = useState({ username: '', password: '', email: '' });
 
-    // 2. Stan do przechowywania tokena od Google (czy użytkownik to człowiek?)
+    /** @brief Token weryfikacyjny od Google reCAPTCHA. */
     const [captchaToken, setCaptchaToken] = useState(null);
 
+    /** @brief Wiadomość zwrotna dla użytkownika (sukces/błąd). */
     const [msg, setMsg] = useState('');
 
+    /**
+     * @brief Obsługuje proces przesyłania danych rejestracyjnych.
+     * * Weryfikuje obecność tokena Captcha, tworzy obiekt żądania
+     * i wysyła go do endpointu /auth/register.
+     * * @param {Event} e Obiekt zdarzenia formularza.
+     */
     const handleRegister = async (e) => {
         e.preventDefault();
 
@@ -57,12 +81,17 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
         }
     };
 
+    /**
+     * @brief Obsługuje kliknięcie w tło modalu.
+     * @param {Event} e Obiekt zdarzenia kliknięcia.
+     */
     const handleOverlayClick = (e) => {
         if (isModal && e.target.classList.contains('modal-overlay')) {
             onClose();
         }
     };
 
+    /** @brief Treść formularza wyekstrahowana do spójnego renderowania w różnych trybach. */
     const formContent = (
         <form onSubmit={handleRegister} className="auth-card">
             <h3>Rejestracja</h3>

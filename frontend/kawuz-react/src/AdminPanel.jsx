@@ -1,18 +1,38 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import "./css/AdminPanel.css";
 
+/** @constant BASE
+ * @brief Adres bazowy API dla operacji administracyjnych.
+ */
 const BASE = "http://localhost:8080/api";
 
+/**
+ * @component AdminPanel
+ * @brief Zaawansowany panel administracyjny do zarządzania produktami.
+ * * Funkcjonalności:
+ * - Dodawanie nowych produktów wraz z przesyłaniem zdjęć (.png).
+ * - Edycja istniejących produktów z podglądem danych i grafiki.
+ * - Usuwanie produktów z bazy danych.
+ * - Dynamiczne przeszukiwanie i sortowanie tabeli produktów.
+ * - Zarządzanie stanami magazynowymi i cechami organoleptycznymi kawy.
+ * * @param {Object} props
+ * @param {Function} props.forceRefresh Funkcja wymuszająca odświeżenie danych w nadrzędnych komponentach (np. liście głównej).
+ */
 function AdminPanel({ forceRefresh }) {
+    /** @brief Lista wszystkich produktów pobrana do celów administracyjnych. */
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
+    /** @brief Klucz sterujący ponownym pobieraniem listy z serwera. */
     const [refreshListKey, setRefreshListKey] = useState(0);
     const [msg, setMsg] = useState("");
 
+    /** @brief Przechowuje wybrany plik obrazu do wysłania na serwer. */
     const [selectedFile, setSelectedFile] = useState(null);
+    /** @brief URL podglądu wybranego zdjęcia (Blob URL). */
     const [previewUrl, setPreviewUrl] = useState(null);
 
+    /** @brief Domyślne wartości dla nowego produktu. */
     const initialFormState = {
         name: "",
         price: "",
@@ -26,12 +46,18 @@ function AdminPanel({ forceRefresh }) {
     };
 
     const [formData, setFormData] = useState(initialFormState);
+    /** @brief Flaga określająca czy formularz jest w trybie edycji czy dodawania. */
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState(null);
 
+    /** @brief Fraza wyszukiwania w tabeli (po ID lub nazwie). */
     const [searchTerm, setSearchTerm] = useState("");
+    /** @brief Konfiguracja aktywnego sortowania kolumn. */
     const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
 
+    /**
+     * @brief Pobiera aktualną listę produktów przy montowaniu lub odświeżeniu.
+     */
     useEffect(() => {
         setLoading(true);
         fetch(`${BASE}/products`)
@@ -41,6 +67,10 @@ function AdminPanel({ forceRefresh }) {
             .finally(() => setLoading(false));
     }, [refreshListKey]);
 
+    /**
+     * @brief Memoizowana lista produktów po zastosowaniu filtrów i sortowania.
+     * Zapobiega niepotrzebnym przeliczeniom przy każdym renderowaniu.
+     */
     const sortedAndFilteredProducts = useMemo(() => {
         let items = [...products];
         if (searchTerm) {
@@ -61,6 +91,10 @@ function AdminPanel({ forceRefresh }) {
         return items;
     }, [products, searchTerm, sortConfig]);
 
+    /**
+     * @brief Zmienia parametry sortowania dla wybranej kolumny.
+     * @param {string} key Nazwa pola, po którym ma nastąpić sortowanie.
+     */
     const requestSort = (key) => {
         let direction = 'asc';
         if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -69,17 +103,26 @@ function AdminPanel({ forceRefresh }) {
         setSortConfig({ key, direction });
     };
 
+    /**
+     * @brief Zwraca ikonę kierunku sortowania dla nagłówka tabeli.
+     */
     const getSortIcon = (key) => {
         if (sortConfig.key !== key) return "↕";
         return sortConfig.direction === 'asc' ? "↑" : "↓";
     };
 
+    /**
+     * @brief Obsługuje zmiany w polach tekstowych, liczbowych i suwakach formularza.
+     */
     const handleChange = (e) => {
         const { name, value } = e.target;
         const val = (e.target.type === 'number' || e.target.type === 'range') ? parseFloat(value) || 0 : value;
         setFormData(prev => ({ ...prev, [name]: val }));
     };
 
+    /**
+     * @brief Obsługuje wybór pliku graficznego i tworzy tymczasowy adres URL do podglądu.
+     */
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -88,10 +131,13 @@ function AdminPanel({ forceRefresh }) {
         }
     };
 
+    /**
+     * @brief Czyści formularz i przywraca stan początkowy (tryb dodawania).
+     */
     const resetForm = () => {
         setFormData(initialFormState);
         setSelectedFile(null);
-        setPreviewUrl(null); // Czyścimy podgląd przy resecie
+        setPreviewUrl(null);
         setIsEditing(false);
         setCurrentId(null);
         setMsg("");
@@ -99,18 +145,24 @@ function AdminPanel({ forceRefresh }) {
         if (fileInput) fileInput.value = "";
     };
 
+    /**
+     * @brief Ładuje dane wybranego produktu do formularza w celu edycji.
+     * @param {Object} product Obiekt produktu wybranego z tabeli.
+     */
     const handleEdit = (product) => {
         setFormData({ ...product });
         setIsEditing(true);
         setCurrentId(product.id);
-
-        // KLUCZOWA POPRAWKA:
-        setSelectedFile(null); // Usuwamy nowo wybrany plik z poprzedniej akcji
-        setPreviewUrl(null);   // Czyścimy podgląd, by formularz załadował obrazek z serwera
-
+        setSelectedFile(null);
+        setPreviewUrl(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    /**
+     * @brief Wysyła dane formularza na serwer przy użyciu Multipart/Form-Data.
+     * * Wysyła obiekt produktu jako JSON (Blob) oraz opcjonalny plik obrazu.
+     * Obsługuje zarówno operacje POST (nowy), jak i PUT (edycja).
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         const url = isEditing ? `${BASE}/product/${currentId}` : `${BASE}/product`;
@@ -142,6 +194,10 @@ function AdminPanel({ forceRefresh }) {
         } catch (e) { setMsg("Błąd połączenia."); }
     };
 
+    /**
+     * @brief Usuwa produkt z bazy danych po potwierdzeniu przez administratora.
+     * @param {number} id Unikalny identyfikator produktu.
+     */
     const handleDelete = async (id) => {
         if (!confirm("Potwierdź usunięcie produktu")) return;
         try {
@@ -198,7 +254,6 @@ function AdminPanel({ forceRefresh }) {
                             ))}
                         </div>
 
-                        {/* PODGLĄD ZDJĘCIA */}
                         <div className="input-group full-width">
                             <label>Zdjęcie produktu (.png)</label>
                             <div className="image-upload-wrapper" onClick={() => document.getElementById('image-upload').click()}>

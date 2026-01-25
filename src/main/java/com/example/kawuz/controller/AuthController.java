@@ -13,15 +13,32 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * @class AuthController
+ * @brief Kontroler odpowiedzialny za uwierzytelnianie i autoryzację użytkowników.
+ * * Zarządza procesami logowania, rejestracji oraz sesjami opartymi na tokenach JWT.
+ * Wykorzystuje mechanizm ciasteczek HttpOnly do bezpiecznego przechowywania tokenów.
+ */
 @RestController
 @RequestMapping("/api/auth")
-// @CrossOrigin removed (handled in config)
 public class AuthController {
 
+    /** Repozytorium do obsługi operacji na danych użytkowników. */
     @Autowired private UserRepository userRepository;
-    @Autowired private JwtUtil jwtUtil; // Inject the utility
+
+    /** Narzędzie do generowania i walidacji tokenów JSON Web Token. */
+    @Autowired private JwtUtil jwtUtil;
+
+    /** Serwis do weryfikacji tokenów reCAPTCHA. */
     @Autowired private CaptchaService captchaService;
 
+    /**
+     * @brief Przeprowadza proces logowania użytkownika.
+     * * Weryfikuje token reCAPTCHA, sprawdza poświadczenia w bazie danych
+     * i generuje bezpieczne ciasteczko HttpOnly z tokenem JWT.
+     * * @param request Obiekt zawierający login, hasło oraz token reCAPTCHA.
+     * @return ResponseEntity zawierające dane użytkownika i ciasteczko sesyjne lub błąd 401.
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
@@ -56,18 +73,27 @@ public class AuthController {
         return ResponseEntity.status(401).body(Map.of("message", "Błąd: Zły login lub hasło"));
     }
 
-    // 3. LOGOUT ENDPOINT (Required to clear cookie)
+    /**
+     * @brief Wylogowuje użytkownika poprzez unieważnienie ciasteczka autoryzacyjnego.
+     * * Ustawia czas życia ciasteczka na 0, co powoduje jego natychmiastowe usunięcie przez przeglądarkę.
+     * * @return ResponseEntity z potwierdzeniem wylogowania.
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         ResponseCookie cookie = ResponseCookie.from("auth_token", "")
                 .httpOnly(true)
                 .path("/")
-                .maxAge(0) // Expires immediately
+                .maxAge(0)
                 .build();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(Map.of("message", "Wylogowano"));
     }
 
-    // 4. CHECK USER STATUS (For React Page Refresh)
+    /**
+     * @brief Weryfikuje aktualny status zalogowania użytkownika na podstawie ciasteczka.
+     * * Pozwala aplikacji frontendowej na odzyskanie danych sesji po odświeżeniu strony.
+     * * @param token Wartość tokena pobrana automatycznie z ciasteczka "auth_token".
+     * @return ResponseEntity z danymi zalogowanego użytkownika lub status 401 w przypadku braku ważnej sesji.
+     */
     @GetMapping("/me")
     public ResponseEntity<?> me(@CookieValue(name = "auth_token", required = false) String token) {
         if (token != null && jwtUtil.validateToken(token)) {
@@ -83,6 +109,12 @@ public class AuthController {
         return ResponseEntity.status(401).build();
     }
 
+    /**
+     * @brief Rejestruje nowego użytkownika w systemie.
+     * * Sprawdza unikalność loginów oraz weryfikuje token reCAPTCHA przed zapisaniem w bazie danych.
+     * * @param request Obiekt zawierający dane nowego konta (login, hasło, email, reCAPTCHA).
+     * @return ResponseEntity z potwierdzeniem sukcesu lub błędem walidacji (np. login zajęty).
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         boolean isHuman = captchaService.verifyCaptcha(request.getRecaptchaToken());

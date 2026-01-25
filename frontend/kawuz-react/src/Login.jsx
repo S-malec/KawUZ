@@ -2,15 +2,42 @@ import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import "./css/Login.css";
 
+/**
+ * @constant BASE
+ * @brief Adres bazowy dla endpointów uwierzytelniania.
+ */
 const BASE = "http://localhost:8080/api";
 
+/**
+ * @component Login
+ * @brief Komponent zarządzający procesem logowania użytkownika.
+ * * Obsługuje:
+ * - Przechowywanie poświadczeń (login, hasło).
+ * - Integrację z ReCAPTCHA v2.
+ * - Wyświetlanie jako samodzielna strona lub modal (overlay).
+ * - Komunikację z backendem przez endpoint /auth/login.
+ * * @param {Object} props
+ * @param {Function} props.onSwitchToRegister Przełącza widok na rejestrację.
+ * @param {Function} props.onLoginSuccess Callback po pomyślnym logowaniu.
+ * @param {Function} props.onCancel Funkcja wywoływana przy rezygnacji.
+ * @param {boolean} props.isModal Czy komponent ma być renderowany wewnątrz modalu.
+ * @param {Function} props.onClose Zamyka modal.
+ */
 export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, isModal = false, onClose }) {
+    /** @brief Dane formularza logowania. */
     const [formData, setFormData] = useState({ username: '', password: '' });
 
+    /** @brief Token otrzymany po pomyślnym rozwiązaniu testu reCAPTCHA. */
     const [captchaToken, setCaptchaToken] = useState(null);
 
+    /** @brief Komunikaty błędów lub statusu dla użytkownika. */
     const [msg, setMsg] = useState('');
 
+    /**
+     * @brief Wykonuje żądanie logowania do serwera.
+     * Wymaga obecności tokena reCAPTCHA. Po sukcesie przekazuje dane użytkownika
+     * (username, role) do wyższego komponentu.
+     */
     const handleLogin = async () => {
         if (!captchaToken) {
             setMsg("Potwierdź, że nie jesteś robotem!");
@@ -46,17 +73,20 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, is
         }
     };
 
+    /** @brief Obsługuje wysłanie formularza (Enter lub przycisk). */
     const handleSubmit = (e) => {
         e.preventDefault();
         handleLogin();
     };
 
+    /** @brief Zamyka modal po kliknięciu w tło (overlay). */
     const handleOverlayClick = (e) => {
         if (isModal && e.target.classList.contains('modal-overlay')) {
             onClose();
         }
     };
 
+    /** @brief Zawartość formularza wyekstrahowana do spójnego renderowania. */
     const formContent = (
         <LoginFormContent
             handleSubmit={handleSubmit}
@@ -80,6 +110,11 @@ export default function Login({ onSwitchToRegister, onLoginSuccess, onCancel, is
     return formContent;
 }
 
+/**
+ * @component LoginFormContent
+ * @brief Prezentacyjny komponent formularza logowania.
+ * Wyodrębniony w celu uniknięcia duplikacji kodu przy renderowaniu modalnym/zwykłym.
+ */
 function LoginFormContent({ handleSubmit, setFormData, formData, onCancel, msg, onSwitchToRegister, setCaptchaToken }) {
     return (
         <form onSubmit={handleSubmit} className="auth-card">
