@@ -1,43 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha"; //
 import "./css/Login.css";
 import { useTranslation } from "react-i18next";
 const BASE = "http://localhost:8080/api";
 
 export default function Register({ onSwitchToLogin, onCancel, isModal = false, onClose }) {
+    // Dane formularza
     const [formData, setFormData] = useState({ username: '', password: '', email: '' });
-    const [captcha, setCaptcha] = useState({ question: '', answer: 0 });
-    const [userCaptcha, setUserCaptcha] = useState('');
-    const [msg, setMsg] = useState('');
-    const { t } = useTranslation();
 
-    useEffect(() => {
-        const a = Math.floor(Math.random() * 10);
-        const b = Math.floor(Math.random() * 10);
-        setCaptcha({ question: `${a} + ${b}`, answer: a + b });
-    }, []);
+    // 2. Stan do przechowywania tokena od Google (czy użytkownik to człowiek?)
+    const [captchaToken, setCaptchaToken] = useState(null);
+
+    const [msg, setMsg] = useState('');
+
+    const { t } = useTranslation();
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        if (parseInt(userCaptcha) !== captcha.answer) {
-            setMsg(t("register.captchaError"));
+
+        // 3. Sprawdzamy, czy użytkownik kliknął w Captchę
+        if (!captchaToken) {
+            setMsg("Potwierdź, że nie jesteś robotem!");
             return;
         }
 
         try {
+            // 4. Tworzymy obiekt do wysłania: dane użytkownika + token captchy
+            const requestBody = {
+                ...formData,
+                recaptchaToken: captchaToken // To pole musi odebrać Java
+            };
+
             const res = await fetch(`${BASE}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(requestBody) // Wysyłamy nowy obiekt
             });
-            const data = await res.json();
+
+            // Obsługa odpowiedzi (czasem backend zwraca tekst, czasem JSON)
+            let data;
+            try {
+                data = await res.json();
+            } catch (err) {
+                data = { message: "Błąd serwera (brak JSON)" };
+            }
 
             if (res.ok) {
                 setMsg(t("register.success"));
                 setTimeout(() => onSwitchToLogin(), 1500);
             } else {
                 setMsg("⚠️ " + (data.message || t("register.error")));
+                // Opcjonalnie: Resetujemy captchę przy błędzie (wymuszenie ponownego kliknięcia)
+                setCaptchaToken(null);
             }
         } catch (err) {
+            console.error(err);
             setMsg(t("register.connectionError"));
         }
     };
@@ -72,14 +89,10 @@ export default function Register({ onSwitchToLogin, onCancel, isModal = false, o
                 value={formData.password}
             />
 
-            <div className="captcha-container">
-                <label>{t("register.captcha")} <b>{captcha.question}</b> ?</label>
-                <input
-                    type="number"
-                    style={{ width: '60px', marginLeft: '10px', marginBottom: 0 }}
-                    value={userCaptcha}
-                    onChange={e => setUserCaptcha(e.target.value)}
-                    required
+            <div className="captcha-container" style={{ margin: "15px 0", display: "flex", justifyContent: "center" }}>
+                <ReCAPTCHA
+                    sitekey="6LeAQ1UsAAAAAGShPV_wIXF5Zg2V61XgtHl3qslz"
+                    onChange={(token) => setCaptchaToken(token)}
                 />
             </div>
 
